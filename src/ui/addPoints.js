@@ -21,20 +21,50 @@ function buildUserSelectRow() {
 function buildActivitySelectRow(targetUserId) {
   const activities = getAllActivities();
 
-  const options = Object.entries(activities).map(([key, value]) => ({
-    label: value.label,
-    value: key,
-    description:
-      value.type === "fixed"
-        ? `${value.points} pct`
-        : value.type === "hourly"
-        ? `${value.pointsPerUnit} pct / oră`
-        : `${value.unitSize} unități = ${value.pointsPerUnit} pct`,
-  }));
+  const options = Object.entries(activities).map(([key, value]) => {
+    let description = "Selectează activitatea";
+
+    if (value.type === "fixed") {
+      description = `${value.points} pct`;
+    } else if (value.type === "hourly") {
+      description = `${value.pointsPerUnit} pct / oră`;
+    } else if (value.type === "quantity") {
+      description = `${value.unitSize} unități = ${value.pointsPerUnit} pct`;
+    } else if (value.type === "donation_family") {
+      description = "Selectezi apoi obiectul donat";
+    }
+
+    return {
+      label: value.label,
+      value: key,
+      description,
+    };
+  });
 
   const selectMenu = new StringSelectMenuBuilder()
     .setCustomId(`add_points_activity:${targetUserId}`)
     .setPlaceholder("Selectează activitatea")
+    .addOptions(options);
+
+  return new ActionRowBuilder().addComponents(selectMenu);
+}
+
+function buildDonationSelectRow(targetUserId, activityKey) {
+  const activity = getActivity(activityKey);
+
+  if (!activity || activity.type !== "donation_family") {
+    throw new Error("Activitate invalidă pentru selecția donației.");
+  }
+
+  const options = Object.entries(activity.options).map(([key, value]) => ({
+    label: value.label,
+    value: key,
+    description: `${value.points} pct`,
+  }));
+
+  const selectMenu = new StringSelectMenuBuilder()
+    .setCustomId(`add_points_donation:${targetUserId}:${activityKey}`)
+    .setPlaceholder("Selectează obiectul donat")
     .addOptions(options);
 
   return new ActionRowBuilder().addComponents(selectMenu);
@@ -53,11 +83,7 @@ function buildValueModal(targetUserId, activityKey) {
 
   const valueInput = new TextInputBuilder()
     .setCustomId("value_input")
-    .setLabel(
-      activity.type === "hourly"
-        ? "Număr ore"
-        : "Cantitate"
-    )
+    .setLabel(activity.type === "hourly" ? "Număr ore" : "Cantitate")
     .setStyle(TextInputStyle.Short)
     .setRequired(true)
     .setPlaceholder(
@@ -86,5 +112,6 @@ function buildValueModal(targetUserId, activityKey) {
 module.exports = {
   buildUserSelectRow,
   buildActivitySelectRow,
+  buildDonationSelectRow,
   buildValueModal,
 };
