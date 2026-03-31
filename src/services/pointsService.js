@@ -124,7 +124,66 @@ async function addPointsEntry({
   };
 }
 
+async function addNegativeAdjustmentEntry({
+  guildId,
+  targetMember,
+  removedByDiscordUserId,
+  pointsToRemove,
+  reason,
+}) {
+  await upsertTrackedUser(targetMember);
+
+  const parsedPoints = Number(pointsToRemove);
+
+  if (!Number.isInteger(parsedPoints) || parsedPoints <= 0) {
+    throw new Error("Numărul de puncte de scăzut trebuie să fie un număr întreg mai mare ca 0.");
+  }
+
+  const cleanReason = String(reason || "").trim();
+
+  if (!cleanReason) {
+    throw new Error("Motivul este obligatoriu.");
+  }
+
+  const negativePoints = -parsedPoints;
+
+  await pool.query(
+    `
+      INSERT INTO point_entries (
+        guild_id,
+        discord_user_id,
+        activity_key,
+        activity_label,
+        calculation_type,
+        hours,
+        quantity,
+        points_awarded,
+        added_by_discord_user_id,
+        note
+      )
+      VALUES ($1, $2, $3, $4, $5, NULL, NULL, $6, $7, $8)
+    `,
+    [
+      guildId,
+      targetMember.id,
+      "manual_adjustment_negative",
+      "Corecție puncte",
+      "adjustment",
+      negativePoints,
+      removedByDiscordUserId,
+      cleanReason,
+    ]
+  );
+
+  return {
+    pointsRemoved: parsedPoints,
+    pointsAwarded: negativePoints,
+    reason: cleanReason,
+  };
+}
+
 module.exports = {
   addPointsEntry,
+  addNegativeAdjustmentEntry,
   calculatePoints,
 };
