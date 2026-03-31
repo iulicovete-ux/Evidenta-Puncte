@@ -34,6 +34,19 @@ async function initDatabase() {
       );
     `);
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS weekly_snapshots (
+        id SERIAL PRIMARY KEY,
+        guild_id TEXT NOT NULL,
+        discord_user_id TEXT NOT NULL,
+        display_name TEXT,
+        total_points INTEGER NOT NULL,
+        entries_count INTEGER NOT NULL DEFAULT 0,
+        reset_by_discord_user_id TEXT NOT NULL,
+        reset_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     console.log("✅ Database initialized");
   } catch (err) {
     console.error("❌ Database init error:", err);
