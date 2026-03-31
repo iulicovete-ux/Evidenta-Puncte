@@ -72,7 +72,7 @@ async function handleAddPointsButton(interaction) {
   }
 
   await interaction.reply({
-    content: "Alege membrul pentru care vrei să adaugi puncte.",
+    content: "Alege membrul pentru care vrei să treci o activitate.",
     components: [buildUserSelectRow()],
     flags: MessageFlags.Ephemeral,
   });
@@ -87,7 +87,7 @@ async function handleUserSelect(interaction) {
   const targetUserId = interaction.values[0];
 
   await interaction.update({
-    content: "Acum selectează activitatea.",
+    content: "Alege activitatea pe care vrei să o treci în registru.",
     components: [buildActivitySelectRow(targetUserId)],
   });
 }
@@ -112,7 +112,7 @@ async function handleActivitySelect(interaction) {
 
   if (activity.type === "donation_family") {
     await interaction.update({
-      content: "Selectează obiectul donat pentru această donație.",
+      content: "Alege ce a fost adus pentru familie.",
       components: [buildDonationSelectRow(targetUserId, activityKey)],
     });
     return;
@@ -120,7 +120,7 @@ async function handleActivitySelect(interaction) {
 
   if (activity.type === "delivery_quantity") {
     await interaction.update({
-      content: "Selectează tipul livrării.",
+      content: "Alege tipul livrării.",
       components: [buildDeliverySelectRow(targetUserId, activityKey)],
     });
     return;
@@ -138,10 +138,11 @@ async function handleActivitySelect(interaction) {
 
     await interaction.update({
       content:
-        `✅ Puncte adăugate cu succes.\n\n` +
+        `✔️ Activitatea a fost trecută în registru.\n\n` +
         `**Membru:** ${targetMember.displayName}\n` +
         `**Activitate:** ${result.activityLabelSnapshot}\n` +
-        `**Puncte acordate:** ${result.pointsAwarded}`,
+        `**Puncte acordate:** ${result.pointsAwarded}\n` +
+        `**Trecut de:** <@${interaction.user.id}>`,
       components: [],
     });
 
@@ -183,10 +184,11 @@ async function handleDonationSelect(interaction) {
 
   await interaction.update({
     content:
-      `✅ Puncte adăugate cu succes.\n\n` +
+      `✔️ Activitatea a fost trecută în registru.\n\n` +
       `**Membru:** ${targetMember.displayName}\n` +
       `**Activitate:** ${result.activityLabelSnapshot}\n` +
-      `**Puncte acordate:** ${result.pointsAwarded}`,
+      `**Puncte acordate:** ${result.pointsAwarded}\n` +
+      `**Trecut de:** <@${interaction.user.id}>`,
     components: [],
   });
 }
@@ -246,11 +248,12 @@ async function handleAddPointsModal(interaction) {
 
   await interaction.reply({
     content:
-      `✅ Puncte adăugate cu succes.\n\n` +
+      `✔️ Activitatea a fost trecută în registru.\n\n` +
       `**Membru:** ${targetMember.displayName}\n` +
       `**Activitate:** ${result.activityLabelSnapshot}\n` +
       `${extraInfo}` +
-      `**Puncte acordate:** ${result.pointsAwarded}` +
+      `**Puncte acordate:** ${result.pointsAwarded}\n` +
+      `**Trecut de:** <@${interaction.user.id}>` +
       (note ? `\n**Notă:** ${note}` : ""),
     flags: MessageFlags.Ephemeral,
   });
@@ -302,10 +305,11 @@ async function handleRemovePointsModal(interaction) {
 
   await interaction.reply({
     content:
-      `✅ Corecție aplicată cu succes.\n\n` +
+      `✔️ Registrul a fost corectat.\n\n` +
       `**Membru:** ${targetMember.displayName}\n` +
       `**Puncte scăzute:** ${result.pointsRemoved}\n` +
-      `**Motiv:** ${result.reason}`,
+      `**Motiv:** ${result.reason}\n` +
+      `**Trecut de:** <@${interaction.user.id}>`,
     flags: MessageFlags.Ephemeral,
   });
 }
@@ -321,7 +325,7 @@ async function handleLeaderboard(interaction) {
 
 async function handleMemberPointsButton(interaction) {
   await interaction.reply({
-    content: "Selectează membrul pe care vrei să-l verifici.",
+    content: "Alege membrul pe care vrei să-l verifici.",
     components: [buildMemberPointsUserSelectRow()],
     flags: MessageFlags.Ephemeral,
   });
@@ -333,7 +337,7 @@ async function handleMemberPointsUserSelect(interaction) {
   const summary = await getMemberPointsSummary(targetUserId);
 
   await interaction.update({
-    content: "Aici ai totalul și istoricul punctelor pentru membrul selectat.",
+    content: "Aici ai totalul și evidența trecută în registru pentru membrul ales.",
     components: [],
     embeds: [buildMemberPointsEmbed(targetMember, summary)],
   });
@@ -351,7 +355,7 @@ async function handlePointsHistoryButton(interaction) {
   }
 
   await interaction.reply({
-    content: "Selectează snapshot-ul pe care vrei să-l vezi.",
+    content: "Alege săptămâna pe care vrei să o răsfoiești.",
     components: [buildSnapshotSelectRow(batches)],
     flags: MessageFlags.Ephemeral,
   });
@@ -378,7 +382,7 @@ async function showSnapshotPage(interaction, batchId, page) {
   const snapshotPage = await getSnapshotEntries(batchId, page, 10);
 
   await interaction.update({
-    content: `Aici ai istoricul pentru snapshot-ul **${batch.label}**.`,
+    content: `Aici ai arhiva pentru **${batch.label}**.`,
     embeds: [buildSnapshotEntriesEmbed(batch, snapshotPage)],
     components: [buildSnapshotPaginationRow(batchId, snapshotPage.currentPage, snapshotPage.totalPages)],
   });
@@ -477,7 +481,7 @@ async function handleCancelResetPoints(interaction) {
   }
 
   await interaction.update({
-    content: "Resetul punctelor a fost anulat.",
+    content: "Închiderea săptămânii a fost anulată.",
     embeds: [],
     components: [],
   });
