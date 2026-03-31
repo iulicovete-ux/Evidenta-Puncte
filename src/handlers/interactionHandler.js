@@ -10,6 +10,7 @@ const {
 const {
   buildResetConfirmationEmbed,
   buildResetConfirmationRow,
+  buildResetSnapshotModal,
   buildResetResultEmbed,
 } = require("../ui/resetPoints");
 const { getLeaderboard } = require("../services/leaderboardService");
@@ -199,14 +200,37 @@ async function handleConfirmResetPoints(interaction) {
     return;
   }
 
+  const modal = buildResetSnapshotModal();
+  await interaction.showModal(modal);
+}
+
+async function handleResetPointsModal(interaction) {
+  if (!canResetPoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const snapshotLabel = interaction.fields
+    .getTextInputValue("snapshot_name_input")
+    .trim();
+
+  if (!snapshotLabel) {
+    await interaction.reply({
+      content: "Trebuie să introduci un nume pentru snapshot.",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
   const result = await resetWeeklyPoints({
     guildId: interaction.guild.id,
     resetByDiscordUserId: interaction.user.id,
+    snapshotLabel,
   });
 
-  await interaction.update({
+  await interaction.reply({
     embeds: [buildResetResultEmbed(result)],
-    components: [],
+    flags: MessageFlags.Ephemeral,
   });
 }
 
@@ -299,6 +323,12 @@ async function handleInteraction(interaction) {
   if (interaction.isModalSubmit()) {
     if (interaction.customId.startsWith("add_points_modal:")) {
       await handleAddPointsModal(interaction);
+      return;
+    }
+
+    if (interaction.customId === "reset_points_modal") {
+      await handleResetPointsModal(interaction);
+      return;
     }
   }
 }
