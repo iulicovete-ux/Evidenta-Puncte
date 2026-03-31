@@ -7,7 +7,7 @@ const {
 function buildMemberPointsUserSelectRow() {
   const userSelect = new UserSelectMenuBuilder()
     .setCustomId("member_points_user_select")
-    .setPlaceholder("Selectează membrul pe care vrei să-l verifici")
+    .setPlaceholder("Alege membrul")
     .setMinValues(1)
     .setMaxValues(1);
 
@@ -24,9 +24,13 @@ function formatEntry(entry) {
     extra = ` • ${entry.quantity} cantitate`;
   }
 
+  const ownerText = entry.addedByDiscordUserId
+    ? `\nTrecut de: <@${entry.addedByDiscordUserId}>`
+    : "";
+
   const noteText = entry.note ? `\nNotă: ${entry.note}` : "";
 
-  return `• **${entry.activityLabel}** — **${entry.pointsAwarded} pct**${extra}\nData: ${date}${noteText}`;
+  return `• **${entry.activityLabel}** — **${entry.pointsAwarded} pct**${extra}\nData: ${date}${ownerText}${noteText}`;
 }
 
 function buildMemberPointsEmbed(targetMember, summary) {
@@ -36,7 +40,7 @@ function buildMemberPointsEmbed(targetMember, summary) {
       : "Nu există încă intrări active pentru acest membru.";
 
   return new EmbedBuilder()
-    .setTitle("📌 Punctele unui membru")
+    .setTitle("📌 Fișa unui membru")
     .setColor(0x3498db)
     .addFields(
       {
