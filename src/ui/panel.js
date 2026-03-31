@@ -10,11 +10,12 @@ function buildMainPanel() {
     .setTitle("📊 Evidență Puncte")
     .setDescription(
       [
-        "Folosește butoanele de mai jos pentru a gestiona punctele membrilor.",
+        "Folosește butoanele de mai jos pentru a gestiona sau verifica sistemul de puncte.",
         "",
         "• **Adaugă puncte** — înregistrează o activitate nouă",
         "• **Scoate puncte** — aplică o corecție negativă",
-        "• **Verifică puncte** — vezi totalul unui membru",
+        "• **Leaderboard** — vezi clasamentul membrilor",
+        "• **Activități & puncte** — vezi toate activitățile și punctajele",
         "• **Reset puncte** — reset general pentru toți membrii",
       ].join("\n")
     )
@@ -22,7 +23,7 @@ function buildMainPanel() {
     .setFooter({ text: "Sistem evidență puncte FiveM RP" })
     .setTimestamp();
 
-  const row = new ActionRowBuilder().addComponents(
+  const row1 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId("add_points")
       .setLabel("Adaugă puncte")
@@ -34,9 +35,16 @@ function buildMainPanel() {
       .setStyle(ButtonStyle.Danger),
 
     new ButtonBuilder()
-      .setCustomId("check_points")
-      .setLabel("Verifică puncte")
-      .setStyle(ButtonStyle.Primary),
+      .setCustomId("leaderboard")
+      .setLabel("Leaderboard")
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  const row2 = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId("activities_info")
+      .setLabel("Activități & puncte")
+      .setStyle(ButtonStyle.Secondary),
 
     new ButtonBuilder()
       .setCustomId("reset_points")
@@ -46,7 +54,7 @@ function buildMainPanel() {
 
   return {
     embeds: [embed],
-    components: [row],
+    components: [row1, row2],
   };
 }
 
