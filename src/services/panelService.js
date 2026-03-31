@@ -11,6 +11,20 @@ async function sendMainPanel(client) {
       return;
     }
 
+    const messages = await channel.messages.fetch({ limit: 20 });
+
+    const existingPanel = messages.find(
+      (msg) =>
+        msg.author.id === client.user.id &&
+        msg.embeds.length > 0 &&
+        msg.embeds[0].title === "📊 Evidență Puncte"
+    );
+
+    if (existingPanel) {
+      console.log("ℹ️ Panel deja existent, nu se retrimite");
+      return;
+    }
+
     const panel = buildMainPanel();
 
     await channel.send(panel);
