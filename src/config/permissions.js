@@ -5,7 +5,6 @@ const ROLE_MEMBRU_MIC_ID = process.env.ROLE_MEMBRU_MIC_ID;
 const MANAGE_POINTS_ROLE_IDS = [
   ROLE_ADMIN_ID,
   ROLE_MEMBRU_MARE_ID,
-  ROLE_MEMBRU_MIC_ID,
 ].filter(Boolean);
 
 const RESET_POINTS_ROLE_IDS = [
@@ -28,7 +27,12 @@ function canResetPoints(member) {
   return memberHasAnyRole(member, RESET_POINTS_ROLE_IDS);
 }
 
+function isMembruMic(member) {
+  return ROLE_MEMBRU_MIC_ID ? memberHasAnyRole(member, [ROLE_MEMBRU_MIC_ID]) : false;
+}
+
 module.exports = {
   canManagePoints,
   canResetPoints,
+  isMembruMic,
 };
