@@ -1,4 +1,6 @@
+const { MessageFlags } = require("discord.js");
 const { getActivity } = require("../config/activities");
+const { canManagePoints, canResetPoints } = require("../config/permissions");
 const {
   buildUserSelectRow,
   buildActivitySelectRow,
@@ -10,15 +12,44 @@ function parseCustomId(customId) {
   return customId.split(":");
 }
 
+async function replyNoPermission(interaction) {
+  const payload = {
+    content: "Nu ai permisiunea necesară pentru această acțiune.",
+    flags: MessageFlags.Ephemeral,
+  };
+
+  if (interaction.replied || interaction.deferred) {
+    await interaction.followUp(payload);
+    return;
+  }
+
+  if (interaction.isMessageComponent()) {
+    await interaction.reply(payload);
+    return;
+  }
+
+  await interaction.reply(payload);
+}
+
 async function handleAddPointsButton(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
   await interaction.reply({
     content: "Alege membrul pentru care vrei să adaugi puncte.",
     components: [buildUserSelectRow()],
-    ephemeral: true,
+    flags: MessageFlags.Ephemeral,
   });
 }
 
 async function handleUserSelect(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
   const targetUserId = interaction.values[0];
 
   await interaction.update({
@@ -28,6 +59,11 @@ async function handleUserSelect(interaction) {
 }
 
 async function handleActivitySelect(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
   const [, targetUserId] = parseCustomId(interaction.customId);
   const activityKey = interaction.values[0];
   const activity = getActivity(activityKey);
@@ -35,7 +71,7 @@ async function handleActivitySelect(interaction) {
   if (!activity) {
     await interaction.reply({
       content: "Activitatea selectată nu există.",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -67,6 +103,11 @@ async function handleActivitySelect(interaction) {
 }
 
 async function handleAddPointsModal(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
   const [, targetUserId, activityKey] = parseCustomId(interaction.customId);
 
   const targetMember = await interaction.guild.members.fetch(targetUserId);
@@ -97,7 +138,7 @@ async function handleAddPointsModal(interaction) {
       `${extraInfo}` +
       `**Puncte acordate:** ${result.pointsAwarded}` +
       (note ? `\n**Notă:** ${note}` : ""),
-    ephemeral: true,
+    flags: MessageFlags.Ephemeral,
   });
 }
 
@@ -109,9 +150,14 @@ async function handleInteraction(interaction) {
     }
 
     if (interaction.customId === "remove_points") {
+      if (!canManagePoints(interaction.member)) {
+        await replyNoPermission(interaction);
+        return;
+      }
+
       await interaction.reply({
         content: "Butonul **Scoate puncte** va fi configurat în pasul următor.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -119,15 +165,20 @@ async function handleInteraction(interaction) {
     if (interaction.customId === "check_points") {
       await interaction.reply({
         content: "Butonul **Verifică puncte** va fi configurat în pasul următor.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
     if (interaction.customId === "reset_points") {
+      if (!canResetPoints(interaction.member)) {
+        await replyNoPermission(interaction);
+        return;
+      }
+
       await interaction.reply({
         content: "Butonul **Reset puncte** va fi configurat în pasul următor.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
