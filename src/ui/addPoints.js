@@ -1,0 +1,90 @@
+const {
+  ActionRowBuilder,
+  UserSelectMenuBuilder,
+  StringSelectMenuBuilder,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+} = require("discord.js");
+const { getAllActivities, getActivity } = require("../config/activities");
+
+function buildUserSelectRow() {
+  const userSelect = new UserSelectMenuBuilder()
+    .setCustomId("add_points_user_select")
+    .setPlaceholder("Selectează membrul pentru care vrei să adaugi puncte")
+    .setMinValues(1)
+    .setMaxValues(1);
+
+  return new ActionRowBuilder().addComponents(userSelect);
+}
+
+function buildActivitySelectRow(targetUserId) {
+  const activities = getAllActivities();
+
+  const options = Object.entries(activities).map(([key, value]) => ({
+    label: value.label,
+    value: key,
+    description:
+      value.type === "fixed"
+        ? `${value.points} pct`
+        : value.type === "hourly"
+        ? `${value.pointsPerUnit} pct / oră`
+        : `${value.unitSize} unități = ${value.pointsPerUnit} pct`,
+  }));
+
+  const selectMenu = new StringSelectMenuBuilder()
+    .setCustomId(`add_points_activity:${targetUserId}`)
+    .setPlaceholder("Selectează activitatea")
+    .addOptions(options);
+
+  return new ActionRowBuilder().addComponents(selectMenu);
+}
+
+function buildValueModal(targetUserId, activityKey) {
+  const activity = getActivity(activityKey);
+
+  if (!activity) {
+    throw new Error("Activitate invalidă pentru modal.");
+  }
+
+  const modal = new ModalBuilder()
+    .setCustomId(`add_points_modal:${targetUserId}:${activityKey}`)
+    .setTitle(`Adaugă puncte - ${activity.label}`);
+
+  const valueInput = new TextInputBuilder()
+    .setCustomId("value_input")
+    .setLabel(
+      activity.type === "hourly"
+        ? "Număr ore"
+        : "Cantitate"
+    )
+    .setStyle(TextInputStyle.Short)
+    .setRequired(true)
+    .setPlaceholder(
+      activity.type === "hourly"
+        ? "Ex: 3"
+        : activity.unitSize === 50
+        ? "Ex: 50, 100, 150..."
+        : "Introdu cantitatea"
+    );
+
+  const noteInput = new TextInputBuilder()
+    .setCustomId("note_input")
+    .setLabel("Notă (opțional)")
+    .setStyle(TextInputStyle.Short)
+    .setRequired(false)
+    .setPlaceholder("Ex: tură seară / livrare centru");
+
+  modal.addComponents(
+    new ActionRowBuilder().addComponents(valueInput),
+    new ActionRowBuilder().addComponents(noteInput)
+  );
+
+  return modal;
+}
+
+module.exports = {
+  buildUserSelectRow,
+  buildActivitySelectRow,
+  buildValueModal,
+};
