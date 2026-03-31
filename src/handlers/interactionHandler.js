@@ -1,5 +1,9 @@
 const { MessageFlags } = require("discord.js");
-const { getActivity, getDonationOption } = require("../config/activities");
+const {
+  getActivity,
+  getDonationOption,
+  getDeliveryOption,
+} = require("../config/activities");
 const { canManagePoints, canResetPoints } = require("../config/permissions");
 const { buildActivitiesInfoEmbed } = require("../ui/activitiesInfo");
 const { buildLeaderboardEmbed } = require("../ui/leaderboard");
@@ -35,6 +39,7 @@ const {
   buildUserSelectRow,
   buildActivitySelectRow,
   buildDonationSelectRow,
+  buildDeliverySelectRow,
   buildValueModal,
 } = require("../ui/addPoints");
 const {
@@ -113,6 +118,14 @@ async function handleActivitySelect(interaction) {
     return;
   }
 
+  if (activity.type === "delivery_quantity") {
+    await interaction.update({
+      content: "Selectează tipul livrării.",
+      components: [buildDeliverySelectRow(targetUserId, activityKey)],
+    });
+    return;
+  }
+
   if (activity.type === "fixed") {
     const targetMember = await interaction.guild.members.fetch(targetUserId);
 
@@ -178,13 +191,37 @@ async function handleDonationSelect(interaction) {
   });
 }
 
-async function handleAddPointsModal(interaction) {
+async function handleDeliverySelect(interaction) {
   if (!canManagePoints(interaction.member)) {
     await replyNoPermission(interaction);
     return;
   }
 
   const [, targetUserId, activityKey] = parseCustomId(interaction.customId);
+  const deliveryOptionKey = interaction.values[0];
+
+  const deliveryOption = getDeliveryOption(activityKey, deliveryOptionKey);
+
+  if (!deliveryOption) {
+    await interaction.reply({
+      content: "Tipul livrării selectat nu există.",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  const modal = buildValueModal(targetUserId, activityKey, deliveryOptionKey);
+  await interaction.showModal(modal);
+}
+
+async function handleAddPointsModal(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const parts = parseCustomId(interaction.customId);
+  const [, targetUserId, activityKey, optionKey = null] = parts;
 
   const targetMember = await interaction.guild.members.fetch(targetUserId);
   const rawValue = interaction.fields.getTextInputValue("value_input");
@@ -196,6 +233,7 @@ async function handleAddPointsModal(interaction) {
     activityKey,
     addedByDiscordUserId: interaction.user.id,
     rawValue,
+    optionKey,
     note,
   });
 
@@ -529,6 +567,11 @@ async function handleInteraction(interaction) {
 
     if (interaction.customId.startsWith("add_points_donation:")) {
       await handleDonationSelect(interaction);
+      return;
+    }
+
+    if (interaction.customId.startsWith("add_points_delivery:")) {
+      await handleDeliverySelect(interaction);
       return;
     }
 
