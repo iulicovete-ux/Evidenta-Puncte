@@ -6,7 +6,7 @@ function buildActivitiesInfoEmbed() {
 
   const fixed = [];
   const hourly = [];
-  const quantity = [];
+  const deliveries = [];
   const donations = [];
 
   for (const [, activity] of Object.entries(activities)) {
@@ -18,10 +18,12 @@ function buildActivitiesInfoEmbed() {
       hourly.push(`• **${activity.label}** — ${activity.pointsPerUnit} pct / oră`);
     }
 
-    if (activity.type === "quantity") {
-      quantity.push(
-        `• **${activity.label}** — ${activity.unitSize} unități = ${activity.pointsPerUnit} pct`
-      );
+    if (activity.type === "delivery_quantity") {
+      for (const [, option] of Object.entries(activity.options)) {
+        deliveries.push(
+          `• **${activity.label} - ${option.label}** — ${option.unitSize} buc = ${option.pointsPerUnit} pct`
+        );
+      }
     }
 
     if (activity.type === "donation_family") {
@@ -48,12 +50,12 @@ function buildActivitiesInfoEmbed() {
         value: hourly.join("\n") || "Nu există.",
       },
       {
-        name: "Activități pe cantitate",
-        value: quantity.join("\n") || "Nu există.",
+        name: "Livrări pe cantitate",
+        value: deliveries.join("\n") || "Nu există.",
       }
     )
     .setFooter({
-      text: "Reguli: ore întregi • livrările se acceptă doar în multipli de 50",
+      text: "Reguli: ore întregi • Meta în multipli de 50 • Carduri/LSD în multipli de 35",
     })
     .setTimestamp();
 
