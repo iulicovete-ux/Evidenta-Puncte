@@ -10,6 +10,7 @@ const { buildLeaderboardEmbed } = require("../ui/leaderboard");
 const {
   buildMemberPointsUserSelectRow,
   buildMemberPointsEmbed,
+  buildPaginationRow,
 } = require("../ui/memberPoints");
 const {
   buildResetConfirmationEmbed,
@@ -28,7 +29,10 @@ const {
   buildRemovePointsModal,
 } = require("../ui/removePoints");
 const { getLeaderboard } = require("../services/leaderboardService");
-const { getMemberPointsSummary } = require("../services/memberPointsService");
+const {
+  getMemberPointsSummary,
+  getMemberPointsPage,
+} = require("../services/memberPointsService");
 const { resetWeeklyPoints } = require("../services/resetService");
 const {
   getSnapshotBatches,
@@ -332,14 +336,31 @@ async function handleMemberPointsButton(interaction) {
 }
 
 async function handleMemberPointsUserSelect(interaction) {
-  const targetUserId = interaction.values[0];
-  const targetMember = await interaction.guild.members.fetch(targetUserId);
-  const summary = await getMemberPointsSummary(targetUserId);
+  const userId = interaction.values[0];
+  const member = await interaction.guild.members.fetch(userId);
+
+  const summary = await getMemberPointsSummary(userId);
+  const pageData = await getMemberPointsPage(userId, 1);
 
   await interaction.update({
     content: "Aici ai totalul și evidența trecută în registru pentru membrul ales.",
-    components: [],
-    embeds: [buildMemberPointsEmbed(targetMember, summary)],
+    embeds: [buildMemberPointsEmbed(member, summary, pageData)],
+    components: [buildPaginationRow(userId, 1, pageData.totalPages)],
+  });
+}
+
+async function handleMemberPagination(interaction) {
+  const [, userId, pageRaw] = interaction.customId.split(":");
+  const page = Number(pageRaw);
+
+  const member = await interaction.guild.members.fetch(userId);
+  const summary = await getMemberPointsSummary(userId);
+  const pageData = await getMemberPointsPage(userId, page);
+
+  await interaction.update({
+    content: "Aici ai totalul și evidența trecută în registru pentru membrul ales.",
+    embeds: [buildMemberPointsEmbed(member, summary, pageData)],
+    components: [buildPaginationRow(userId, pageData.currentPage, pageData.totalPages)],
   });
 }
 
@@ -384,7 +405,13 @@ async function showSnapshotPage(interaction, batchId, page) {
   await interaction.update({
     content: `Aici ai arhiva pentru **${batch.label}**.`,
     embeds: [buildSnapshotEntriesEmbed(batch, snapshotPage)],
-    components: [buildSnapshotPaginationRow(batchId, snapshotPage.currentPage, snapshotPage.totalPages)],
+    components: [
+      buildSnapshotPaginationRow(
+        batchId,
+        snapshotPage.currentPage,
+        snapshotPage.totalPages
+      ),
+    ],
   });
 }
 
@@ -542,6 +569,14 @@ async function handleInteraction(interaction) {
       interaction.customId.startsWith("history_next:")
     ) {
       await handleHistoryPagination(interaction);
+      return;
+    }
+
+    if (
+      interaction.customId.startsWith("member_prev:") ||
+      interaction.customId.startsWith("member_next:")
+    ) {
+      await handleMemberPagination(interaction);
       return;
     }
   }
