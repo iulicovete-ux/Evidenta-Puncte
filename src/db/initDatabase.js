@@ -35,8 +35,19 @@ async function initDatabase() {
     `);
 
     await pool.query(`
+      CREATE TABLE IF NOT EXISTS snapshot_batches (
+        id SERIAL PRIMARY KEY,
+        guild_id TEXT NOT NULL,
+        label TEXT NOT NULL,
+        reset_by_discord_user_id TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS weekly_snapshots (
         id SERIAL PRIMARY KEY,
+        batch_id INTEGER NOT NULL REFERENCES snapshot_batches(id) ON DELETE CASCADE,
         guild_id TEXT NOT NULL,
         discord_user_id TEXT NOT NULL,
         display_name TEXT,
