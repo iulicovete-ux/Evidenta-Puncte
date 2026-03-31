@@ -1,5 +1,9 @@
 const { pool } = require("../db/pool");
-const { getActivity, getDonationOption } = require("../config/activities");
+const {
+  getActivity,
+  getDonationOption,
+  getDeliveryOption,
+} = require("../config/activities");
 
 async function upsertTrackedUser(member) {
   const discordUserId = member.id;
@@ -20,7 +24,7 @@ async function upsertTrackedUser(member) {
   );
 }
 
-function calculatePoints(activityKey, rawValue = null) {
+function calculatePoints(activityKey, rawValue = null, optionKey = null) {
   const activity = getActivity(activityKey);
 
   if (!activity) {
@@ -66,22 +70,30 @@ function calculatePoints(activityKey, rawValue = null) {
     };
   }
 
-  if (activity.type === "quantity") {
+  if (activity.type === "delivery_quantity") {
+    const deliveryOption = getDeliveryOption(activityKey, optionKey);
+
+    if (!deliveryOption) {
+      throw new Error("Tipul livrării este invalid.");
+    }
+
     const quantity = Number(rawValue);
 
     if (!Number.isInteger(quantity) || quantity <= 0) {
       throw new Error("Cantitatea trebuie să fie un număr întreg mai mare ca 0.");
     }
 
-    if (quantity % activity.unitSize !== 0) {
-      throw new Error(`Cantitatea trebuie să fie multiplu de ${activity.unitSize}.`);
+    if (quantity % deliveryOption.unitSize !== 0) {
+      throw new Error(
+        `Cantitatea pentru ${deliveryOption.label} trebuie să fie multiplu de ${deliveryOption.unitSize}.`
+      );
     }
 
     return {
-      pointsAwarded: (quantity / activity.unitSize) * activity.pointsPerUnit,
+      pointsAwarded: (quantity / deliveryOption.unitSize) * deliveryOption.pointsPerUnit,
       hours: null,
       quantity,
-      activityLabelSnapshot: activity.label,
+      activityLabelSnapshot: `${activity.label} - ${deliveryOption.label}`,
     };
   }
 
@@ -94,6 +106,7 @@ async function addPointsEntry({
   activityKey,
   addedByDiscordUserId,
   rawValue = null,
+  optionKey = null,
   note = null,
 }) {
   const activity = getActivity(activityKey);
@@ -104,7 +117,7 @@ async function addPointsEntry({
 
   await upsertTrackedUser(targetMember);
 
-  const calculation = calculatePoints(activityKey, rawValue);
+  const calculation = calculatePoints(activityKey, rawValue, optionKey);
 
   await pool.query(
     `
