@@ -19,6 +19,10 @@ const {
   buildSnapshotEntriesEmbed,
   buildSnapshotPaginationRow,
 } = require("../ui/historyPoints");
+const {
+  buildRemovePointsUserSelectRow,
+  buildRemovePointsModal,
+} = require("../ui/removePoints");
 const { getLeaderboard } = require("../services/leaderboardService");
 const { getMemberPointsSummary } = require("../services/memberPointsService");
 const { resetWeeklyPoints } = require("../services/resetService");
@@ -32,7 +36,10 @@ const {
   buildActivitySelectRow,
   buildValueModal,
 } = require("../ui/addPoints");
-const { addPointsEntry } = require("../services/pointsService");
+const {
+  addPointsEntry,
+  addNegativeAdjustmentEntry,
+} = require("../services/pointsService");
 
 function parseCustomId(customId) {
   return customId.split(":");
@@ -159,6 +166,60 @@ async function handleAddPointsModal(interaction) {
       `${extraInfo}` +
       `**Puncte acordate:** ${result.pointsAwarded}` +
       (note ? `\n**Notă:** ${note}` : ""),
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleRemovePointsButton(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  await interaction.reply({
+    content: "Selectează membrul căruia vrei să-i scoți puncte.",
+    components: [buildRemovePointsUserSelectRow()],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleRemovePointsUserSelect(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const targetUserId = interaction.values[0];
+  const modal = buildRemovePointsModal(targetUserId);
+  await interaction.showModal(modal);
+}
+
+async function handleRemovePointsModal(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const [, targetUserId] = parseCustomId(interaction.customId);
+  const targetMember = await interaction.guild.members.fetch(targetUserId);
+
+  const pointsInput = interaction.fields.getTextInputValue("points_input");
+  const reasonInput = interaction.fields.getTextInputValue("reason_input");
+
+  const result = await addNegativeAdjustmentEntry({
+    guildId: interaction.guild.id,
+    targetMember,
+    removedByDiscordUserId: interaction.user.id,
+    pointsToRemove: pointsInput,
+    reason: reasonInput,
+  });
+
+  await interaction.reply({
+    content:
+      `✅ Corecție aplicată cu succes.\n\n` +
+      `**Membru:** ${targetMember.displayName}\n` +
+      `**Puncte scăzute:** ${result.pointsRemoved}\n` +
+      `**Motiv:** ${result.reason}`,
     flags: MessageFlags.Ephemeral,
   });
 }
@@ -344,15 +405,7 @@ async function handleInteraction(interaction) {
     }
 
     if (interaction.customId === "remove_points") {
-      if (!canManagePoints(interaction.member)) {
-        await replyNoPermission(interaction);
-        return;
-      }
-
-      await interaction.reply({
-        content: "Butonul **Scoate puncte** va fi configurat în pasul următor.",
-        flags: MessageFlags.Ephemeral,
-      });
+      await handleRemovePointsButton(interaction);
       return;
     }
 
@@ -413,6 +466,11 @@ async function handleInteraction(interaction) {
       await handleMemberPointsUserSelect(interaction);
       return;
     }
+
+    if (interaction.customId === "remove_points_user_select") {
+      await handleRemovePointsUserSelect(interaction);
+      return;
+    }
   }
 
   if (interaction.isStringSelectMenu()) {
@@ -430,6 +488,11 @@ async function handleInteraction(interaction) {
   if (interaction.isModalSubmit()) {
     if (interaction.customId.startsWith("add_points_modal:")) {
       await handleAddPointsModal(interaction);
+      return;
+    }
+
+    if (interaction.customId.startsWith("remove_points_modal:")) {
+      await handleRemovePointsModal(interaction);
       return;
     }
 
