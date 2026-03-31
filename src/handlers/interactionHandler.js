@@ -1,6 +1,7 @@
 const { MessageFlags } = require("discord.js");
 const { getActivity } = require("../config/activities");
 const { canManagePoints, canResetPoints } = require("../config/permissions");
+const { buildActivitiesInfoEmbed } = require("../ui/activitiesInfo");
 const {
   buildUserSelectRow,
   buildActivitySelectRow,
@@ -20,11 +21,6 @@ async function replyNoPermission(interaction) {
 
   if (interaction.replied || interaction.deferred) {
     await interaction.followUp(payload);
-    return;
-  }
-
-  if (interaction.isMessageComponent()) {
-    await interaction.reply(payload);
     return;
   }
 
@@ -162,9 +158,17 @@ async function handleInteraction(interaction) {
       return;
     }
 
-    if (interaction.customId === "check_points") {
+    if (interaction.customId === "leaderboard") {
       await interaction.reply({
-        content: "Butonul **Verifică puncte** va fi configurat în pasul următor.",
+        content: "Butonul **Leaderboard** va fi configurat în pasul următor.",
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    if (interaction.customId === "activities_info") {
+      await interaction.reply({
+        embeds: [buildActivitiesInfoEmbed()],
         flags: MessageFlags.Ephemeral,
       });
       return;
