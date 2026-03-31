@@ -1,10 +1,25 @@
 const { pool } = require("../db/pool");
 
-async function resetWeeklyPoints({ guildId, resetByDiscordUserId }) {
+async function resetWeeklyPoints({ guildId, resetByDiscordUserId, snapshotLabel }) {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
+
+    const batchInsertResult = await client.query(
+      `
+        INSERT INTO snapshot_batches (
+          guild_id,
+          label,
+          reset_by_discord_user_id
+        )
+        VALUES ($1, $2, $3)
+        RETURNING id, label, created_at
+      `,
+      [guildId, snapshotLabel, resetByDiscordUserId]
+    );
+
+    const batch = batchInsertResult.rows[0];
 
     const snapshotResult = await client.query(
       `
@@ -30,6 +45,7 @@ async function resetWeeklyPoints({ guildId, resetByDiscordUserId }) {
       await client.query(
         `
           INSERT INTO weekly_snapshots (
+            batch_id,
             guild_id,
             discord_user_id,
             display_name,
@@ -37,9 +53,10 @@ async function resetWeeklyPoints({ guildId, resetByDiscordUserId }) {
             entries_count,
             reset_by_discord_user_id
           )
-          VALUES ($1, $2, $3, $4, $5, $6)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
         `,
         [
+          batch.id,
           guildId,
           row.discord_user_id,
           row.display_name,
@@ -61,14 +78,10 @@ async function resetWeeklyPoints({ guildId, resetByDiscordUserId }) {
     await client.query("COMMIT");
 
     return {
+      batchId: batch.id,
+      batchLabel: batch.label,
       snapshotCount: snapshotRows.length,
       deletedEntriesCount: deleteResult.rowCount || 0,
-      snapshotRows: snapshotRows.map((row) => ({
-        discordUserId: row.discord_user_id,
-        displayName: row.display_name,
-        totalPoints: Number(row.total_points),
-        entriesCount: Number(row.entries_count),
-      })),
     };
   } catch (error) {
     await client.query("ROLLBACK");
