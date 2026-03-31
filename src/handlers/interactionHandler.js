@@ -3,7 +3,12 @@ const { getActivity } = require("../config/activities");
 const { canManagePoints, canResetPoints } = require("../config/permissions");
 const { buildActivitiesInfoEmbed } = require("../ui/activitiesInfo");
 const { buildLeaderboardEmbed } = require("../ui/leaderboard");
+const {
+  buildMemberPointsUserSelectRow,
+  buildMemberPointsEmbed,
+} = require("../ui/memberPoints");
 const { getLeaderboard } = require("../services/leaderboardService");
+const { getMemberPointsSummary } = require("../services/memberPointsService");
 const {
   buildUserSelectRow,
   buildActivitySelectRow,
@@ -141,11 +146,31 @@ async function handleAddPointsModal(interaction) {
 }
 
 async function handleLeaderboard(interaction) {
-  const entries = await getLeaderboard(10);
+  const entries = await getLeaderboard(100);
 
   await interaction.reply({
     embeds: [buildLeaderboardEmbed(entries)],
     flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleMemberPointsButton(interaction) {
+  await interaction.reply({
+    content: "Selectează membrul pe care vrei să-l verifici.",
+    components: [buildMemberPointsUserSelectRow()],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleMemberPointsUserSelect(interaction) {
+  const targetUserId = interaction.values[0];
+  const targetMember = await interaction.guild.members.fetch(targetUserId);
+  const summary = await getMemberPointsSummary(targetUserId);
+
+  await interaction.update({
+    content: "Aici ai totalul și istoricul punctelor pentru membrul selectat.",
+    components: [],
+    embeds: [buildMemberPointsEmbed(targetMember, summary)],
   });
 }
 
@@ -174,6 +199,11 @@ async function handleInteraction(interaction) {
       return;
     }
 
+    if (interaction.customId === "member_points") {
+      await handleMemberPointsButton(interaction);
+      return;
+    }
+
     if (interaction.customId === "activities_info") {
       await interaction.reply({
         embeds: [buildActivitiesInfoEmbed()],
@@ -199,6 +229,11 @@ async function handleInteraction(interaction) {
   if (interaction.isUserSelectMenu()) {
     if (interaction.customId === "add_points_user_select") {
       await handleUserSelect(interaction);
+      return;
+    }
+
+    if (interaction.customId === "member_points_user_select") {
+      await handleMemberPointsUserSelect(interaction);
       return;
     }
   }
