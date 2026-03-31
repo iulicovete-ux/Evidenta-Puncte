@@ -20,7 +20,8 @@ async function getMemberPointsSummary(discordUserId) {
         quantity,
         points_awarded,
         note,
-        created_at
+        created_at,
+        added_by_discord_user_id
       FROM point_entries
       WHERE discord_user_id = $1
         AND is_voided = FALSE
@@ -40,6 +41,7 @@ async function getMemberPointsSummary(discordUserId) {
       pointsAwarded: Number(row.points_awarded),
       note: row.note,
       createdAt: row.created_at,
+      addedByDiscordUserId: row.added_by_discord_user_id,
     })),
   };
 }
