@@ -1,5 +1,5 @@
 const { MessageFlags } = require("discord.js");
-const { getActivity } = require("../config/activities");
+const { getActivity, getDonationOption } = require("../config/activities");
 const { canManagePoints, canResetPoints } = require("../config/permissions");
 const { buildActivitiesInfoEmbed } = require("../ui/activitiesInfo");
 const { buildLeaderboardEmbed } = require("../ui/leaderboard");
@@ -34,6 +34,7 @@ const {
 const {
   buildUserSelectRow,
   buildActivitySelectRow,
+  buildDonationSelectRow,
   buildValueModal,
 } = require("../ui/addPoints");
 const {
@@ -104,6 +105,14 @@ async function handleActivitySelect(interaction) {
     return;
   }
 
+  if (activity.type === "donation_family") {
+    await interaction.update({
+      content: "Selectează obiectul donat pentru această donație.",
+      components: [buildDonationSelectRow(targetUserId, activityKey)],
+    });
+    return;
+  }
+
   if (activity.type === "fixed") {
     const targetMember = await interaction.guild.members.fetch(targetUserId);
 
@@ -118,7 +127,7 @@ async function handleActivitySelect(interaction) {
       content:
         `✅ Puncte adăugate cu succes.\n\n` +
         `**Membru:** ${targetMember.displayName}\n` +
-        `**Activitate:** ${result.activity.label}\n` +
+        `**Activitate:** ${result.activityLabelSnapshot}\n` +
         `**Puncte acordate:** ${result.pointsAwarded}`,
       components: [],
     });
@@ -128,6 +137,45 @@ async function handleActivitySelect(interaction) {
 
   const modal = buildValueModal(targetUserId, activityKey);
   await interaction.showModal(modal);
+}
+
+async function handleDonationSelect(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const [, targetUserId, activityKey] = parseCustomId(interaction.customId);
+  const donationKey = interaction.values[0];
+
+  const donationOption = getDonationOption(activityKey, donationKey);
+
+  if (!donationOption) {
+    await interaction.reply({
+      content: "Obiectul donat selectat nu există.",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  const targetMember = await interaction.guild.members.fetch(targetUserId);
+
+  const result = await addPointsEntry({
+    guildId: interaction.guild.id,
+    targetMember,
+    activityKey,
+    addedByDiscordUserId: interaction.user.id,
+    rawValue: donationKey,
+  });
+
+  await interaction.update({
+    content:
+      `✅ Puncte adăugate cu succes.\n\n` +
+      `**Membru:** ${targetMember.displayName}\n` +
+      `**Activitate:** ${result.activityLabelSnapshot}\n` +
+      `**Puncte acordate:** ${result.pointsAwarded}`,
+    components: [],
+  });
 }
 
 async function handleAddPointsModal(interaction) {
@@ -162,7 +210,7 @@ async function handleAddPointsModal(interaction) {
     content:
       `✅ Puncte adăugate cu succes.\n\n` +
       `**Membru:** ${targetMember.displayName}\n` +
-      `**Activitate:** ${result.activity.label}\n` +
+      `**Activitate:** ${result.activityLabelSnapshot}\n` +
       `${extraInfo}` +
       `**Puncte acordate:** ${result.pointsAwarded}` +
       (note ? `\n**Notă:** ${note}` : ""),
@@ -476,6 +524,11 @@ async function handleInteraction(interaction) {
   if (interaction.isStringSelectMenu()) {
     if (interaction.customId.startsWith("add_points_activity:")) {
       await handleActivitySelect(interaction);
+      return;
+    }
+
+    if (interaction.customId.startsWith("add_points_donation:")) {
+      await handleDonationSelect(interaction);
       return;
     }
 
