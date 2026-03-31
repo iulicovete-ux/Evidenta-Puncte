@@ -7,62 +7,63 @@ const {
 
 function buildMainPanel() {
   const embed = new EmbedBuilder()
-    .setTitle("📊 Evidență Puncte")
+    .setTitle("📜 Registrul familiei")
     .setDescription(
       [
-        "Folosește butoanele de mai jos pentru a gestiona sau verifica sistemul de puncte.",
+        "Aici este ținută evidența contribuției fiecărui membru.",
+        "Din acest registru poți trece activități, verifica situația unui om, consulta clasamentul actual sau răsfoi arhiva săptămânilor trecute.",
         "",
-        "• **Adaugă puncte** — înregistrează o activitate nouă",
-        "• **Scoate puncte** — aplică o corecție negativă",
-        "• **Leaderboard** — vezi clasamentul membrilor",
-        "• **Verifică punctele unui membru** — vezi totalul și istoricul curent",
-        "• **Istoric puncte** — vezi snapshot-urile salvate după reset",
-        "• **Activități & puncte** — vezi toate activitățile și punctajele",
-        "• **Reset puncte** — reset general pentru toți membrii",
+        "• **Adaugă în registru** — notezi o activitate nouă pentru un membru",
+        "• **Scade din registru** — corectezi o evidență trecută greșit",
+        "• **Clasamentul familiei** — vezi ordinea membrilor după contribuție",
+        "• **Fișa unui membru** — vezi totalul și evidența lui curentă",
+        "• **Arhiva familiei** — vezi săptămânile salvate după ședință",
+        "• **Activități recunoscute** — vezi ce contribuții sunt luate în seamă și cât valorează",
+        "• **Închide săptămâna** — salvezi situația actuală și deschizi o perioadă nouă",
       ].join("\n")
     )
     .setColor(0x00ae86)
-    .setFooter({ text: "Sistem evidență puncte FiveM RP" })
+    .setFooter({ text: "Evidența internă a familiei" })
     .setTimestamp();
 
   const row1 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId("add_points")
-      .setLabel("Adaugă puncte")
+      .setLabel("Adaugă în registru")
       .setStyle(ButtonStyle.Success),
 
     new ButtonBuilder()
       .setCustomId("remove_points")
-      .setLabel("Scoate puncte")
+      .setLabel("Scade din registru")
       .setStyle(ButtonStyle.Danger),
 
     new ButtonBuilder()
       .setCustomId("leaderboard")
-      .setLabel("Leaderboard")
+      .setLabel("Clasamentul familiei")
       .setStyle(ButtonStyle.Primary)
   );
 
   const row2 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId("member_points")
-      .setLabel("Verifică punctele unui membru")
+      .setLabel("Fișa unui membru")
       .setStyle(ButtonStyle.Primary),
 
     new ButtonBuilder()
       .setCustomId("points_history")
-      .setLabel("Istoric puncte")
+      .setLabel("Arhiva familiei")
       .setStyle(ButtonStyle.Secondary),
 
     new ButtonBuilder()
       .setCustomId("activities_info")
-      .setLabel("Activități & puncte")
+      .setLabel("Activități recunoscute")
       .setStyle(ButtonStyle.Secondary)
   );
 
   const row3 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId("reset_points")
-      .setLabel("Reset puncte")
+      .setLabel("Închide săptămâna")
       .setStyle(ButtonStyle.Secondary)
   );
 
