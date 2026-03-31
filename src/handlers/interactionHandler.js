@@ -2,6 +2,8 @@ const { MessageFlags } = require("discord.js");
 const { getActivity } = require("../config/activities");
 const { canManagePoints, canResetPoints } = require("../config/permissions");
 const { buildActivitiesInfoEmbed } = require("../ui/activitiesInfo");
+const { buildLeaderboardEmbed } = require("../ui/leaderboard");
+const { getLeaderboard } = require("../services/leaderboardService");
 const {
   buildUserSelectRow,
   buildActivitySelectRow,
@@ -138,6 +140,15 @@ async function handleAddPointsModal(interaction) {
   });
 }
 
+async function handleLeaderboard(interaction) {
+  const entries = await getLeaderboard(10);
+
+  await interaction.reply({
+    embeds: [buildLeaderboardEmbed(entries)],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
 async function handleInteraction(interaction) {
   if (interaction.isButton()) {
     if (interaction.customId === "add_points") {
@@ -159,10 +170,7 @@ async function handleInteraction(interaction) {
     }
 
     if (interaction.customId === "leaderboard") {
-      await interaction.reply({
-        content: "Butonul **Leaderboard** va fi configurat în pasul următor.",
-        flags: MessageFlags.Ephemeral,
-      });
+      await handleLeaderboard(interaction);
       return;
     }
 
