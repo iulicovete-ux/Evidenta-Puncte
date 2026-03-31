@@ -7,34 +7,34 @@ const {
 
 function buildMainPanel() {
   const embed = new EmbedBuilder()
-    .setTitle("📜 Registrul familiei")
+    .setTitle("📜 Registrul familiei Merida")
     .setDescription(
       [
         "Aici este ținută evidența contribuției fiecărui membru.",
         "Din acest registru poți trece activități, verifica situația unui om, consulta clasamentul actual sau răsfoi arhiva săptămânilor trecute.",
         "",
-        "• **Adaugă în registru** — notezi o activitate nouă pentru un membru",
-        "• **Scade din registru** — corectezi o evidență trecută greșit",
+        "• **Adaugă puncte unui membru** — notezi o activitate nouă pentru un membru",
+        "• **Scade puncte unui membru** — corectezi o evidență trecută greșit",
         "• **Clasamentul familiei** — vezi ordinea membrilor după contribuție",
         "• **Fișa unui membru** — vezi totalul și evidența lui curentă",
         "• **Arhiva familiei** — vezi săptămânile salvate după ședință",
-        "• **Activități recunoscute** — vezi ce contribuții sunt luate în seamă și cât valorează",
+        "• **Lista activităților recunoscute** — vezi ce contribuții sunt luate în seamă și cât valorează",
         "• **Închide săptămâna** — salvezi situația actuală și deschizi o perioadă nouă",
       ].join("\n")
     )
     .setColor(0x00ae86)
-    .setFooter({ text: "Evidența internă a familiei" })
+    .setFooter({ text: "Evidența internă a familiei Merida" })
     .setTimestamp();
 
   const row1 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId("add_points")
-      .setLabel("Adaugă în registru")
+      .setLabel("Adaugă puncte unui membru")
       .setStyle(ButtonStyle.Success),
 
     new ButtonBuilder()
       .setCustomId("remove_points")
-      .setLabel("Scade din registru")
+      .setLabel("Scade puncte unui membru")
       .setStyle(ButtonStyle.Danger),
 
     new ButtonBuilder()
@@ -56,7 +56,7 @@ function buildMainPanel() {
 
     new ButtonBuilder()
       .setCustomId("activities_info")
-      .setLabel("Activități recunoscute")
+      .setLabel("Lista activităților recunoscute")
       .setStyle(ButtonStyle.Secondary)
   );
 
