@@ -16,6 +16,7 @@ function buildMainPanel() {
         "• **Scoate puncte** — aplică o corecție negativă",
         "• **Leaderboard** — vezi clasamentul membrilor",
         "• **Verifică punctele unui membru** — vezi totalul și istoricul curent",
+        "• **Istoric puncte** — vezi snapshot-urile salvate după reset",
         "• **Activități & puncte** — vezi toate activitățile și punctajele",
         "• **Reset puncte** — reset general pentru toți membrii",
       ].join("\n")
@@ -48,10 +49,17 @@ function buildMainPanel() {
       .setStyle(ButtonStyle.Primary),
 
     new ButtonBuilder()
-      .setCustomId("activities_info")
-      .setLabel("Activități & puncte")
+      .setCustomId("points_history")
+      .setLabel("Istoric puncte")
       .setStyle(ButtonStyle.Secondary),
 
+    new ButtonBuilder()
+      .setCustomId("activities_info")
+      .setLabel("Activități & puncte")
+      .setStyle(ButtonStyle.Secondary)
+  );
+
+  const row3 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId("reset_points")
       .setLabel("Reset puncte")
@@ -60,7 +68,7 @@ function buildMainPanel() {
 
   return {
     embeds: [embed],
-    components: [row1, row2],
+    components: [row1, row2, row3],
   };
 }
 
