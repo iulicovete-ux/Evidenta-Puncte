@@ -1,11 +1,49 @@
 const ACTIVITIES = {
-  // ===== FIXED =====
+  // ===== SPECIAL =====
   donatii_familie: {
     label: "Donații familie",
-    type: "fixed",
-    points: 3,
+    type: "donation_family",
+    options: {
+      otel: {
+        label: "Oțel (min 25 buc)",
+        points: 3,
+      },
+      sulf: {
+        label: "Sulf (50 buc)",
+        points: 3,
+      },
+      polimer: {
+        label: "Polimer (150 buc)",
+        points: 3,
+      },
+      fosfor: {
+        label: "Fosfor (100 buc)",
+        points: 3,
+      },
+      baterie: {
+        label: "Baterie",
+        points: 1,
+      },
+      placa: {
+        label: "Placă",
+        points: 1,
+      },
+      fire: {
+        label: "Fire",
+        points: 1,
+      },
+      gps_tracker: {
+        label: "GPS Tracker",
+        points: 5,
+      },
+      hacking_device: {
+        label: "Hacking Device",
+        points: 5,
+      },
+    },
   },
 
+  // ===== FIXED =====
   postat_anunt: {
     label: "Postat anunț angajare",
     type: "fixed",
@@ -113,7 +151,7 @@ const ACTIVITIES = {
   livrat_familie: {
     label: "Livrat familie",
     type: "quantity",
-    unitSize: 50, // 50 plicuri = 1 pct
+    unitSize: 50,
     pointsPerUnit: 1,
   },
 
@@ -125,8 +163,6 @@ const ACTIVITIES = {
   },
 };
 
-// ===== HELPERS =====
-
 function getActivity(key) {
   return ACTIVITIES[key];
 }
@@ -135,8 +171,19 @@ function getAllActivities() {
   return ACTIVITIES;
 }
 
+function getDonationOption(activityKey, optionKey) {
+  const activity = ACTIVITIES[activityKey];
+
+  if (!activity || activity.type !== "donation_family") {
+    return null;
+  }
+
+  return activity.options[optionKey] || null;
+}
+
 module.exports = {
   ACTIVITIES,
   getActivity,
   getAllActivities,
+  getDonationOption,
 };
