@@ -1,5 +1,5 @@
 const { pool } = require("../db/pool");
-const { getActivity } = require("../config/activities");
+const { getActivity, getDonationOption } = require("../config/activities");
 
 async function upsertTrackedUser(member) {
   const discordUserId = member.id;
@@ -32,6 +32,22 @@ function calculatePoints(activityKey, rawValue = null) {
       pointsAwarded: activity.points,
       hours: null,
       quantity: null,
+      activityLabelSnapshot: activity.label,
+    };
+  }
+
+  if (activity.type === "donation_family") {
+    const donationOption = getDonationOption(activityKey, rawValue);
+
+    if (!donationOption) {
+      throw new Error("Obiectul donat este invalid.");
+    }
+
+    return {
+      pointsAwarded: donationOption.points,
+      hours: null,
+      quantity: null,
+      activityLabelSnapshot: `${activity.label} - ${donationOption.label}`,
     };
   }
 
@@ -46,6 +62,7 @@ function calculatePoints(activityKey, rawValue = null) {
       pointsAwarded: hours * activity.pointsPerUnit,
       hours,
       quantity: null,
+      activityLabelSnapshot: activity.label,
     };
   }
 
@@ -64,6 +81,7 @@ function calculatePoints(activityKey, rawValue = null) {
       pointsAwarded: (quantity / activity.unitSize) * activity.pointsPerUnit,
       hours: null,
       quantity,
+      activityLabelSnapshot: activity.label,
     };
   }
 
@@ -108,7 +126,7 @@ async function addPointsEntry({
       guildId,
       targetMember.id,
       activityKey,
-      activity.label,
+      calculation.activityLabelSnapshot,
       activity.type,
       calculation.hours,
       calculation.quantity,
