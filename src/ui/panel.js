@@ -15,6 +15,7 @@ function buildMainPanel() {
         "• **Adaugă puncte** — înregistrează o activitate nouă",
         "• **Scoate puncte** — aplică o corecție negativă",
         "• **Leaderboard** — vezi clasamentul membrilor",
+        "• **Verifică punctele unui membru** — vezi totalul și istoricul curent",
         "• **Activități & puncte** — vezi toate activitățile și punctajele",
         "• **Reset puncte** — reset general pentru toți membrii",
       ].join("\n")
@@ -41,6 +42,11 @@ function buildMainPanel() {
   );
 
   const row2 = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId("member_points")
+      .setLabel("Verifică punctele unui membru")
+      .setStyle(ButtonStyle.Primary),
+
     new ButtonBuilder()
       .setCustomId("activities_info")
       .setLabel("Activități & puncte")
