@@ -147,19 +147,39 @@ const ACTIVITIES = {
     pointsPerUnit: 1,
   },
 
-  // ===== QUANTITY =====
+  // ===== SPECIAL QUANTITY =====
   livrat_familie: {
     label: "Livrat familie",
-    type: "quantity",
-    unitSize: 50,
-    pointsPerUnit: 1,
+    type: "delivery_quantity",
+    options: {
+      meta: {
+        label: "Meta",
+        unitSize: 50,
+        pointsPerUnit: 1,
+      },
+      carduri_lsd: {
+        label: "Carduri / LSD",
+        unitSize: 35,
+        pointsPerUnit: 1,
+      },
+    },
   },
 
   livrat_membru: {
     label: "Livrat membru",
-    type: "quantity",
-    unitSize: 50,
-    pointsPerUnit: 1,
+    type: "delivery_quantity",
+    options: {
+      meta: {
+        label: "Meta",
+        unitSize: 50,
+        pointsPerUnit: 1,
+      },
+      carduri_lsd: {
+        label: "Carduri / LSD",
+        unitSize: 35,
+        pointsPerUnit: 1,
+      },
+    },
   },
 };
 
@@ -181,9 +201,20 @@ function getDonationOption(activityKey, optionKey) {
   return activity.options[optionKey] || null;
 }
 
+function getDeliveryOption(activityKey, optionKey) {
+  const activity = ACTIVITIES[activityKey];
+
+  if (!activity || activity.type !== "delivery_quantity") {
+    return null;
+  }
+
+  return activity.options[optionKey] || null;
+}
+
 module.exports = {
   ACTIVITIES,
   getActivity,
   getAllActivities,
   getDonationOption,
+  getDeliveryOption,
 };
