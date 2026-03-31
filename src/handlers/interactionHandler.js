@@ -7,8 +7,14 @@ const {
   buildMemberPointsUserSelectRow,
   buildMemberPointsEmbed,
 } = require("../ui/memberPoints");
+const {
+  buildResetConfirmationEmbed,
+  buildResetConfirmationRow,
+  buildResetResultEmbed,
+} = require("../ui/resetPoints");
 const { getLeaderboard } = require("../services/leaderboardService");
 const { getMemberPointsSummary } = require("../services/memberPointsService");
+const { resetWeeklyPoints } = require("../services/resetService");
 const {
   buildUserSelectRow,
   buildActivitySelectRow,
@@ -174,6 +180,49 @@ async function handleMemberPointsUserSelect(interaction) {
   });
 }
 
+async function handleResetPointsButton(interaction) {
+  if (!canResetPoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  await interaction.reply({
+    embeds: [buildResetConfirmationEmbed()],
+    components: [buildResetConfirmationRow()],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleConfirmResetPoints(interaction) {
+  if (!canResetPoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const result = await resetWeeklyPoints({
+    guildId: interaction.guild.id,
+    resetByDiscordUserId: interaction.user.id,
+  });
+
+  await interaction.update({
+    embeds: [buildResetResultEmbed(result)],
+    components: [],
+  });
+}
+
+async function handleCancelResetPoints(interaction) {
+  if (!canResetPoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  await interaction.update({
+    content: "Resetul punctelor a fost anulat.",
+    embeds: [],
+    components: [],
+  });
+}
+
 async function handleInteraction(interaction) {
   if (interaction.isButton()) {
     if (interaction.customId === "add_points") {
@@ -213,15 +262,17 @@ async function handleInteraction(interaction) {
     }
 
     if (interaction.customId === "reset_points") {
-      if (!canResetPoints(interaction.member)) {
-        await replyNoPermission(interaction);
-        return;
-      }
+      await handleResetPointsButton(interaction);
+      return;
+    }
 
-      await interaction.reply({
-        content: "Butonul **Reset puncte** va fi configurat în pasul următor.",
-        flags: MessageFlags.Ephemeral,
-      });
+    if (interaction.customId === "confirm_reset_points") {
+      await handleConfirmResetPoints(interaction);
+      return;
+    }
+
+    if (interaction.customId === "cancel_reset_points") {
+      await handleCancelResetPoints(interaction);
       return;
     }
   }
