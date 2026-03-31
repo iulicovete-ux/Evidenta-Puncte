@@ -47,7 +47,6 @@ async function initDatabase() {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS weekly_snapshots (
         id SERIAL PRIMARY KEY,
-        batch_id INTEGER NOT NULL REFERENCES snapshot_batches(id) ON DELETE CASCADE,
         guild_id TEXT NOT NULL,
         discord_user_id TEXT NOT NULL,
         display_name TEXT,
@@ -56,6 +55,29 @@ async function initDatabase() {
         reset_by_discord_user_id TEXT NOT NULL,
         reset_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    await pool.query(`
+      ALTER TABLE weekly_snapshots
+      ADD COLUMN IF NOT EXISTS batch_id INTEGER;
+    `);
+
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1
+          FROM pg_constraint
+          WHERE conname = 'weekly_snapshots_batch_id_fkey'
+        ) THEN
+          ALTER TABLE weekly_snapshots
+          ADD CONSTRAINT weekly_snapshots_batch_id_fkey
+          FOREIGN KEY (batch_id)
+          REFERENCES snapshot_batches(id)
+          ON DELETE CASCADE;
+        END IF;
+      END
+      $$;
     `);
 
     console.log("✅ Database initialized");
