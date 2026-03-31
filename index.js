@@ -1,18 +1,24 @@
 require("dotenv").config();
 
-const { Client, GatewayIntentBits } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  EmbedBuilder,
+} = require("discord.js");
+
 const { Pool } = require("pg");
 
 // ===== ENV =====
 const TOKEN = process.env.TOKEN;
 const DATABASE_URL = process.env.DATABASE_URL;
+const CHANNEL_ID = process.env.CHANNEL_ID_EVIDENTA;
 
 // ===== DISCORD CLIENT =====
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
-  ],
+  intents: [GatewayIntentBits.Guilds],
 });
 
 // ===== DATABASE =====
@@ -64,11 +70,57 @@ async function initDatabase() {
   }
 }
 
+// ===== CREATE PANEL =====
+async function createPanel() {
+  try {
+    const channel = await client.channels.fetch(CHANNEL_ID);
+
+    if (!channel) {
+      console.log("❌ Canalul nu a fost găsit");
+      return;
+    }
+
+    const embed = new EmbedBuilder()
+      .setTitle("📊 Evidență Puncte")
+      .setDescription(
+        "Folosește butoanele de mai jos pentru a gestiona punctele membrilor."
+      )
+      .setColor(0x00ae86);
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("add_points")
+        .setLabel("Adaugă puncte")
+        .setStyle(ButtonStyle.Success),
+
+      new ButtonBuilder()
+        .setCustomId("remove_points")
+        .setLabel("Scoate puncte")
+        .setStyle(ButtonStyle.Danger),
+
+      new ButtonBuilder()
+        .setCustomId("check_points")
+        .setLabel("Verifică puncte")
+        .setStyle(ButtonStyle.Primary)
+    );
+
+    await channel.send({
+      embeds: [embed],
+      components: [row],
+    });
+
+    console.log("✅ Panel trimis");
+  } catch (err) {
+    console.error("❌ Eroare panel:", err);
+  }
+}
+
 // ===== EVENTS =====
 client.once("clientReady", async () => {
   console.log(`🤖 Logged in as ${client.user.tag}`);
 
   await initDatabase();
+  await createPanel();
 });
 
 // ===== LOGIN =====
