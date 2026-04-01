@@ -109,7 +109,7 @@ async function handleActivitySelect(interaction) {
 
   if (!activity) {
     await interaction.reply({
-      content: "Activitatea selectată nu există.",
+      content: "Activitatea selectata nu exista.",
       flags: MessageFlags.Ephemeral,
     });
     return;
@@ -125,7 +125,7 @@ async function handleActivitySelect(interaction) {
 
   if (activity.type === "delivery_quantity") {
     await interaction.update({
-      content: "Alege tipul livrării.",
+      content: "Alege tipul livrarii.",
       components: [buildDeliverySelectRow(targetUserId, activityKey)],
     });
     return;
@@ -149,11 +149,11 @@ async function handleActivitySelect(interaction) {
 
     await interaction.update({
       content:
-        ✔️ Activitatea a fost trecută în registru.\n\n +
-        **Membru:** ${targetMember.displayName}\n +
-        **Activitate:** ${result.activityLabelSnapshot}\n +
-        **Puncte acordate:** ${result.pointsAwarded}\n +
-        **Trecut de:** <@${interaction.user.id}>,
+        "Activitatea a fost trecuta in registru.\n\n" +
+        Membru: ${targetMember.displayName}\n +
+        Activitate: ${result.activityLabelSnapshot}\n +
+        Puncte acordate: ${result.pointsAwarded}\n +
+        Trecut de: <@${interaction.user.id}>,
       components: [],
     });
 
@@ -177,7 +177,7 @@ async function handleDonationSelect(interaction) {
 
   if (!donationOption) {
     await interaction.reply({
-      content: "Obiectul donat selectat nu există.",
+      content: "Obiectul donat selectat nu exista.",
       flags: MessageFlags.Ephemeral,
     });
     return;
@@ -201,11 +201,11 @@ async function handleDonationSelect(interaction) {
 
   await interaction.update({
     content:
-      ✔️ Activitatea a fost trecută în registru.\n\n +
-      **Membru:** ${targetMember.displayName}\n +
-      **Activitate:** ${result.activityLabelSnapshot}\n +
-      **Puncte acordate:** ${result.pointsAwarded}\n +
-      **Trecut de:** <@${interaction.user.id}>,
+      "Activitatea a fost trecuta in registru.\n\n" +
+      Membru: ${targetMember.displayName}\n +
+      Activitate: ${result.activityLabelSnapshot}\n +
+      Puncte acordate: ${result.pointsAwarded}\n +
+      Trecut de: <@${interaction.user.id}>,
     components: [],
   });
 }
@@ -258,20 +258,20 @@ async function handleAddPointsModal(interaction) {
 
   const extraInfo =
     result.hours !== null
-      ? **Ore:** ${result.hours}\n
+      ? Ore: ${result.hours}\n
       : result.quantity !== null
-      ? **Cantitate:** ${result.quantity}\n
+      ? Cantitate: ${result.quantity}\n
       : "";
 
   await interaction.reply({
     content:
-      ✔️ Activitatea a fost trecută în registru.\n\n +
-      **Membru:** ${targetMember.displayName}\n +
-      **Activitate:** ${result.activityLabelSnapshot}\n +
+      "Activitatea a fost trecuta in registru.\n\n" +
+      Membru: ${targetMember.displayName}\n +
+      Activitate: ${result.activityLabelSnapshot}\n +
       ${extraInfo} +
-      **Puncte acordate:** ${result.pointsAwarded}\n +
-      **Trecut de:** <@${interaction.user.id}> +
-      (note ? \n**Notă:** ${note} : ""),
+      Puncte acordate: ${result.pointsAwarded}\n +
+      Trecut de: <@${interaction.user.id}> +
+      (note ? \nNota: ${note} : ""),
     flags: MessageFlags.Ephemeral,
   });
 }
@@ -298,12 +298,12 @@ async function handleRequiredNoteModal(interaction) {
 
   await interaction.reply({
     content:
-      ✔️ Activitatea a fost trecută în registru.\n\n +
-      **Membru:** ${targetMember.displayName}\n +
-      **Activitate:** ${result.activityLabelSnapshot}\n +
-      **Puncte acordate:** ${result.pointsAwarded}\n +
-      **Trecut de:** <@${interaction.user.id}>\n +
-      **Descriere:** ${requiredNote},
+      "Activitatea a fost trecuta in registru.\n\n" +
+      Membru: ${targetMember.displayName}\n +
+      Activitate: ${result.activityLabelSnapshot}\n +
+      Puncte acordate: ${result.pointsAwarded}\n +
+      Trecut de: <@${interaction.user.id}>\n +
+      Descriere: ${requiredNote},
     flags: MessageFlags.Ephemeral,
   });
 }
