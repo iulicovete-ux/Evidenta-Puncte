@@ -43,23 +43,18 @@ function buildMemberPointsEmbed(targetMember, summary, pageData) {
       : "Nu există intrări.";
 
   return new EmbedBuilder()
-    .setTitle("📌 Fișa unui membru")
+    .setTitle(`📌 Fișa membrului ${targetMember.displayName}`)
     .setColor(0x3498db)
-    .addFields(
-      {
-        name: "Membru",
-        value: targetMember.displayName,
-        inline: true,
-      },
-      {
-        name: "Total puncte",
-        value: `${summary.totalPoints} pct`,
-        inline: true,
-      }
-    )
+
+    .addFields({
+      name: "Total puncte",
+      value: `**${summary.totalPoints} pct**`,
+    })
+
     .setDescription(
       `**Istoric (pagina ${pageData.currentPage}/${pageData.totalPages})**\n\n${history}`
     )
+
     .setFooter({ text: "Registrul familiei" })
     .setTimestamp();
 }
