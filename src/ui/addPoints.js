@@ -25,15 +25,15 @@ function buildActivitySelectRow(targetUserId) {
     let description = "Alege activitatea";
 
     if (value.type === "fixed") {
-      description = ${value.points} pct;
+      description = `${value.points} pct`;
     } else if (value.type === "fixed_with_required_note") {
-      description = ${value.points} pct • necesită descriere;
+      description = `${value.points} pct • necesita descriere`;
     } else if (value.type === "hourly") {
-      description = ${value.pointsPerUnit} pct / oră;
+      description = `${value.pointsPerUnit} pct / ora`;
     } else if (value.type === "donation_family") {
-      description = "Alegi obiectul și cantitatea";
+      description = "Alegi obiectul si cantitatea";
     } else if (value.type === "delivery_quantity") {
-      description = "Alegi tipul și cantitatea";
+      description = "Alegi tipul si cantitatea";
     }
 
     return {
@@ -44,7 +44,7 @@ function buildActivitySelectRow(targetUserId) {
   });
 
   const selectMenu = new StringSelectMenuBuilder()
-    .setCustomId(add_points_activity:${targetUserId})
+    .setCustomId(`add_points_activity:${targetUserId}`)
     .setPlaceholder("Alege activitatea")
     .addOptions(options);
 
@@ -55,14 +55,14 @@ function buildDonationSelectRow(targetUserId, activityKey) {
   const activity = getActivity(activityKey);
 
   if (!activity || activity.type !== "donation_family") {
-    throw new Error("Activitate invalidă pentru selecția donației.");
+    throw new Error("Activitate invalida pentru selectia donatiei.");
   }
 
   const options = Object.entries(activity.options).map(([key, value]) => {
     const description =
       value.mode === "quantity"
-        ? ${value.unitSize} buc = ${value.pointsPerUnit} pct
-        : ${value.points} pct;
+        ? `${value.unitSize} buc = ${value.pointsPerUnit} pct`
+        : `${value.points} pct`;
 
     return {
       label: value.label,
@@ -72,8 +72,8 @@ function buildDonationSelectRow(targetUserId, activityKey) {
   });
 
   const selectMenu = new StringSelectMenuBuilder()
-    .setCustomId(add_points_donation:${targetUserId}:${activityKey})
-    .setPlaceholder("Selectează obiectul donat")
+    .setCustomId(`add_points_donation:${targetUserId}:${activityKey}`)
+    .setPlaceholder("Selecteaza obiectul donat")
     .addOptions(options);
 
   return new ActionRowBuilder().addComponents(selectMenu);
@@ -83,18 +83,18 @@ function buildDeliverySelectRow(targetUserId, activityKey) {
   const activity = getActivity(activityKey);
 
   if (!activity || activity.type !== "delivery_quantity") {
-    throw new Error("Activitate invalidă pentru selecția livrării.");
+    throw new Error("Activitate invalida pentru selectia livrarii.");
   }
 
   const options = Object.entries(activity.options).map(([key, value]) => ({
     label: value.label,
     value: key,
-    description: ${value.unitSize} buc = ${value.pointsPerUnit} pct,
+    description: `${value.unitSize} buc = ${value.pointsPerUnit} pct`,
   }));
 
   const selectMenu = new StringSelectMenuBuilder()
-    .setCustomId(add_points_delivery:${targetUserId}:${activityKey})
-    .setPlaceholder("Selectează tipul livrării")
+    .setCustomId(`add_points_delivery:${targetUserId}:${activityKey}`)
+    .setPlaceholder("Selecteaza tipul livrarii")
     .addOptions(options);
 
   return new ActionRowBuilder().addComponents(selectMenu);
@@ -104,22 +104,22 @@ function buildValueModal(targetUserId, activityKey, optionKey = null) {
   const activity = getActivity(activityKey);
 
   if (!activity) {
-    throw new Error("Activitate invalidă pentru modal.");
+    throw new Error("Activitate invalida pentru modal.");
   }
 
   const modalId = optionKey
-    ? add_points_modal:${targetUserId}:${activityKey}:${optionKey}
-    : add_points_modal:${targetUserId}:${activityKey};
+    ? `add_points_modal:${targetUserId}:${activityKey}:${optionKey}`
+    : `add_points_modal:${targetUserId}:${activityKey}`;
 
   const modal = new ModalBuilder()
     .setCustomId(modalId)
-    .setTitle(Adaugă puncte - ${activity.label});
+    .setTitle(`Adauga puncte - ${activity.label}`);
 
   let valueLabel = "Cantitate";
   let placeholder = "Introdu valoarea";
 
   if (activity.type === "hourly") {
-    valueLabel = "Număr ore";
+    valueLabel = "Numar ore";
     placeholder = "Ex: 3";
   }
 
@@ -130,7 +130,7 @@ function buildValueModal(targetUserId, activityKey, optionKey = null) {
       throw new Error("Tip de livrare invalid pentru modal.");
     }
 
-    valueLabel = Cantitate ${selectedOption.label};
+    valueLabel = `Cantitate ${selectedOption.label}`;
     placeholder =
       selectedOption.unitSize === 50
         ? "Ex: 50, 100, 150..."
@@ -141,12 +141,12 @@ function buildValueModal(targetUserId, activityKey, optionKey = null) {
     const selectedOption = activity.options?.[optionKey];
 
     if (!selectedOption) {
-      throw new Error("Obiect de donație invalid pentru modal.");
+      throw new Error("Obiect de donatie invalid pentru modal.");
     }
 
     if (selectedOption.mode === "quantity") {
-      valueLabel = Cantitate ${selectedOption.label};
-      placeholder = Multiplu de ${selectedOption.unitSize};
+      valueLabel = `Cantitate ${selectedOption.label}`;
+      placeholder = `Multiplu de ${selectedOption.unitSize}`;
     }
   }
 
@@ -159,10 +159,10 @@ function buildValueModal(targetUserId, activityKey, optionKey = null) {
 
   const noteInput = new TextInputBuilder()
     .setCustomId("note_input")
-    .setLabel("Notă (opțional)")
+    .setLabel("Nota (optional)")
     .setStyle(TextInputStyle.Short)
     .setRequired(false)
-    .setPlaceholder("Ex: tură seară / livrare centru");
+    .setPlaceholder("Ex: tura seara / livrare centru");
 
   modal.addComponents(
     new ActionRowBuilder().addComponents(valueInput),
@@ -176,20 +176,22 @@ function buildRequiredNoteModal(targetUserId, activityKey) {
   const activity = getActivity(activityKey);
 
   if (!activity) {
-    throw new Error("Activitate invalidă pentru modal.");
+    throw new Error("Activitate invalida pentru modal.");
   }
 
   const modal = new ModalBuilder()
-    .setCustomId(add_points_required_note_modal:${targetUserId}:${activityKey})
-    .setTitle(Adaugă puncte - ${activity.label});
+    .setCustomId(`add_points_required_note_modal:${targetUserId}:${activityKey}`)
+    .setTitle(`Adauga puncte - ${activity.label}`);
 
   const descriptionInput = new TextInputBuilder()
     .setCustomId("required_note_input")
-    .setLabel("Ce acțiune a avut loc")
+    .setLabel("Ce actiune a avut loc")
     .setStyle(TextInputStyle.Paragraph)
     .setRequired(true)
     .setMaxLength(300)
-    .setPlaceholder("Ex: re-stock la magazin, mutare materiale, ajutor spontan la locație");
+    .setPlaceholder(
+      "Ex: re-stock la magazin, mutare materiale, ajutor spontan la locatie"
+    );
 
   modal.addComponents(
     new ActionRowBuilder().addComponents(descriptionInput)
