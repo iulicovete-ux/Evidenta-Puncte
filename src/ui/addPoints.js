@@ -11,7 +11,7 @@ const { getAllActivities, getActivity } = require("../config/activities");
 function buildUserSelectRow() {
   const userSelect = new UserSelectMenuBuilder()
     .setCustomId("add_points_user_select")
-    .setPlaceholder("Selectează membrul pentru care vrei să adaugi puncte")
+    .setPlaceholder("Alege membrul")
     .setMinValues(1)
     .setMaxValues(1);
 
@@ -22,16 +22,16 @@ function buildActivitySelectRow(targetUserId) {
   const activities = getAllActivities();
 
   const options = Object.entries(activities).map(([key, value]) => {
-    let description = "Selectează activitatea";
+    let description = "Alege activitatea";
 
     if (value.type === "fixed") {
       description = `${value.points} pct`;
     } else if (value.type === "hourly") {
       description = `${value.pointsPerUnit} pct / oră`;
     } else if (value.type === "donation_family") {
-      description = "Selectezi apoi obiectul donat";
+      description = "Alegi obiectul și cantitatea";
     } else if (value.type === "delivery_quantity") {
-      description = "Selectezi apoi tipul și cantitatea";
+      description = "Alegi tipul și cantitatea";
     }
 
     return {
@@ -43,7 +43,7 @@ function buildActivitySelectRow(targetUserId) {
 
   const selectMenu = new StringSelectMenuBuilder()
     .setCustomId(`add_points_activity:${targetUserId}`)
-    .setPlaceholder("Selectează activitatea")
+    .setPlaceholder("Alege activitatea")
     .addOptions(options);
 
   return new ActionRowBuilder().addComponents(selectMenu);
@@ -56,11 +56,18 @@ function buildDonationSelectRow(targetUserId, activityKey) {
     throw new Error("Activitate invalidă pentru selecția donației.");
   }
 
-  const options = Object.entries(activity.options).map(([key, value]) => ({
-    label: value.label,
-    value: key,
-    description: `${value.points} pct`,
-  }));
+  const options = Object.entries(activity.options).map(([key, value]) => {
+    const description =
+      value.mode === "quantity"
+        ? `${value.unitSize} buc = ${value.pointsPerUnit} pct`
+        : `${value.points} pct`;
+
+    return {
+      label: value.label,
+      value: key,
+      description,
+    };
+  });
 
   const selectMenu = new StringSelectMenuBuilder()
     .setCustomId(`add_points_donation:${targetUserId}:${activityKey}`)
@@ -126,6 +133,19 @@ function buildValueModal(targetUserId, activityKey, optionKey = null) {
       selectedOption.unitSize === 50
         ? "Ex: 50, 100, 150..."
         : "Ex: 35, 70, 105...";
+  }
+
+  if (activity.type === "donation_family") {
+    const selectedOption = activity.options?.[optionKey];
+
+    if (!selectedOption) {
+      throw new Error("Obiect de donație invalid pentru modal.");
+    }
+
+    if (selectedOption.mode === "quantity") {
+      valueLabel = `Cantitate ${selectedOption.label}`;
+      placeholder = `Multiplu de ${selectedOption.unitSize}`;
+    }
   }
 
   const valueInput = new TextInputBuilder()
