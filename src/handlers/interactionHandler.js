@@ -149,11 +149,11 @@ async function handleActivitySelect(interaction) {
 
     await interaction.update({
       content:
-        Activitatea a fost trecută în registru.\n\n +
-        Membru: ${targetMember.displayName}\n +
-        Activitate: ${result.activityLabelSnapshot}\n +
-        Puncte acordate: ${result.pointsAwarded}\n +
-        Trecut de: <@${interaction.user.id}>,
+        `Activitatea a fost trecută în registru.\n\n` +
+        `Membru: ${targetMember.displayName}\n` +
+        `Activitate: ${result.activityLabelSnapshot}\n` +
+        `Puncte acordate: ${result.pointsAwarded}\n` +
+        `Trecut de: <@${interaction.user.id}>`,
       components: [],
     });
 
@@ -201,11 +201,11 @@ async function handleDonationSelect(interaction) {
 
   await interaction.update({
     content:
-      Activitatea a fost trecută în registru.\n\n +
-      Membru: ${targetMember.displayName}\n +
-      Activitate: ${result.activityLabelSnapshot}\n +
-      Puncte acordate: ${result.pointsAwarded}\n +
-      Trecut de: <@${interaction.user.id}>,
+      `Activitatea a fost trecută în registru.\n\n` +
+      `Membru: ${targetMember.displayName}\n` +
+      `Activitate: ${result.activityLabelSnapshot}\n` +
+      `Puncte acordate: ${result.pointsAwarded}\n` +
+      `Trecut de: <@${interaction.user.id}>`,
     components: [],
   });
 }
@@ -258,20 +258,20 @@ async function handleAddPointsModal(interaction) {
 
   const extraInfo =
     result.hours !== null
-      ? Ore: ${result.hours}\n
+      ? `Ore: ${result.hours}\n`
       : result.quantity !== null
-      ? Cantitate: ${result.quantity}\n
+      ? `Cantitate: ${result.quantity}\n`
       : "";
 
   await interaction.reply({
     content:
-      Activitatea a fost trecută în registru.\n\n +
-      Membru: ${targetMember.displayName}\n +
-      Activitate: ${result.activityLabelSnapshot}\n +
-      ${extraInfo} +
-      Puncte acordate: ${result.pointsAwarded}\n +
-      Trecut de: <@${interaction.user.id}> +
-      (note ? \nNota: ${note} : ""),
+      `Activitatea a fost trecută în registru.\n\n` +
+      `Membru: ${targetMember.displayName}\n` +
+      `Activitate: ${result.activityLabelSnapshot}\n` +
+      `${extraInfo}` +
+      `Puncte acordate: ${result.pointsAwarded}\n` +
+      `Trecut de: <@${interaction.user.id}>` +
+      (note ? `\nNota: ${note}` : ""),
     flags: MessageFlags.Ephemeral,
   });
 }
@@ -298,12 +298,12 @@ async function handleRequiredNoteModal(interaction) {
 
   await interaction.reply({
     content:
-      Activitatea a fost trecută în registru.\n\n +
-      Membru: ${targetMember.displayName}\n +
-      Activitate: ${result.activityLabelSnapshot}\n +
-      Puncte acordate: ${result.pointsAwarded}\n +
-      Trecut de: <@${interaction.user.id}>\n +
-      Descriere: ${requiredNote},
+      `Activitatea a fost trecută în registru.\n\n` +
+      `Membru: ${targetMember.displayName}\n` +
+      `Activitate: ${result.activityLabelSnapshot}\n` +
+      `Puncte acordate: ${result.pointsAwarded}\n` +
+      `Trecut de: <@${interaction.user.id}>\n` +
+      `Descriere: ${requiredNote}`,
     flags: MessageFlags.Ephemeral,
   });
 }
@@ -354,11 +354,11 @@ async function handleRemovePointsModal(interaction) {
 
   await interaction.reply({
     content:
-      Registrul a fost corectat.\n\n +
-      Membru: ${targetMember.displayName}\n +
-      Puncte scăzute: ${result.pointsRemoved}\n +
-      Motiv: ${result.reason}\n +
-      Trecut de: <@${interaction.user.id}>,
+      `Registrul a fost corectat.\n\n` +
+      `Membru: ${targetMember.displayName}\n` +
+      `Puncte scăzute: ${result.pointsRemoved}\n` +
+      `Motiv: ${result.reason}\n` +
+      `Trecut de: <@${interaction.user.id}>`,
     flags: MessageFlags.Ephemeral,
   });
 }
