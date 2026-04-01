@@ -403,7 +403,7 @@ async function showSnapshotPage(interaction, batchId, page) {
   const snapshotPage = await getSnapshotEntries(batchId, page, 10);
 
   await interaction.update({
-    content: null, // 🔥 eliminăm textul de sus
+    content: null,
     embeds: [buildSnapshotEntriesEmbed(batch, snapshotPage)],
     components: [
       buildSnapshotPaginationRow(
