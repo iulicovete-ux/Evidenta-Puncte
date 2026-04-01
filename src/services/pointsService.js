@@ -31,7 +31,7 @@ function calculatePoints(activityKey, rawValue = null, optionKey = null) {
     throw new Error("Activitate invalidă.");
   }
 
-  if (activity.type === "fixed") {
+  if (activity.type === "fixed" || activity.type === "fixed_with_required_note") {
     return {
       pointsAwarded: activity.points,
       hours: null,
@@ -52,7 +52,7 @@ function calculatePoints(activityKey, rawValue = null, optionKey = null) {
         pointsAwarded: donationOption.points,
         hours: null,
         quantity: null,
-        activityLabelSnapshot: `${activity.label} - ${donationOption.label}`,
+        activityLabelSnapshot: ${activity.label} - ${donationOption.label},
       };
     }
 
@@ -64,7 +64,7 @@ function calculatePoints(activityKey, rawValue = null, optionKey = null) {
 
     if (quantity % donationOption.unitSize !== 0) {
       throw new Error(
-        `Cantitatea pentru ${donationOption.label} trebuie să fie multiplu de ${donationOption.unitSize}.`
+        Cantitatea pentru ${donationOption.label} trebuie să fie multiplu de ${donationOption.unitSize}.
       );
     }
 
@@ -72,7 +72,7 @@ function calculatePoints(activityKey, rawValue = null, optionKey = null) {
       pointsAwarded: (quantity / donationOption.unitSize) * donationOption.pointsPerUnit,
       hours: null,
       quantity,
-      activityLabelSnapshot: `${activity.label} - ${donationOption.label}`,
+      activityLabelSnapshot: ${activity.label} - ${donationOption.label},
     };
   }
 
@@ -106,7 +106,7 @@ function calculatePoints(activityKey, rawValue = null, optionKey = null) {
 
     if (quantity % deliveryOption.unitSize !== 0) {
       throw new Error(
-        `Cantitatea pentru ${deliveryOption.label} trebuie să fie multiplu de ${deliveryOption.unitSize}.`
+        Cantitatea pentru ${deliveryOption.label} trebuie să fie multiplu de ${deliveryOption.unitSize}.
       );
     }
 
@@ -114,7 +114,7 @@ function calculatePoints(activityKey, rawValue = null, optionKey = null) {
       pointsAwarded: (quantity / deliveryOption.unitSize) * deliveryOption.pointsPerUnit,
       hours: null,
       quantity,
-      activityLabelSnapshot: `${activity.label} - ${deliveryOption.label}`,
+      activityLabelSnapshot: ${activity.label} - ${deliveryOption.label},
     };
   }
 
@@ -134,6 +134,14 @@ async function addPointsEntry({
 
   if (!activity) {
     throw new Error("Activitatea selectată nu există.");
+  }
+
+  if (activity.type === "fixed_with_required_note") {
+    const cleanNote = String(note || "").trim();
+
+    if (!cleanNote) {
+      throw new Error("Descrierea este obligatorie pentru această activitate.");
+    }
   }
 
   await upsertTrackedUser(targetMember);
