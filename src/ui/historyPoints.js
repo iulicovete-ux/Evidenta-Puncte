@@ -19,7 +19,7 @@ function buildSnapshotSelectRow(batches) {
 
   const select = new StringSelectMenuBuilder()
     .setCustomId("points_history_snapshot_select")
-    .setPlaceholder("Selectează snapshot-ul pe care vrei să-l vezi")
+    .setPlaceholder("Alege perioada...")
     .addOptions(options);
 
   return new ActionRowBuilder().addComponents(select);
