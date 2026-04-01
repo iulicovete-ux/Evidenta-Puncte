@@ -34,41 +34,37 @@ function buildNoSnapshotsEmbed() {
 }
 
 function buildSnapshotEntriesEmbed(batch, snapshotPage) {
-  const description =
+  const entries =
     snapshotPage.entries.length > 0
       ? snapshotPage.entries
           .map(
-            (entry) =>
-              `**#${entry.rank}** — ${entry.displayName} • **${entry.totalPoints} pct** (${entry.entriesCount} intrări)`
+            (entry, index) =>
+              `#${(snapshotPage.currentPage - 1) * 10 + index + 1} — ${entry.display_name} • **${entry.total_points} pct** (${entry.entries_count} intrări)`
           )
           .join("\n")
-      : "Nu există membri în acest snapshot.";
+      : "Nu există date pentru această perioadă.";
 
   return new EmbedBuilder()
-    .setTitle("🗂️ Istoric puncte")
+    .setTitle(`📁 Istoric puncte pentru ${batch.label}`)
+    .setColor(0x9b59b6)
     .addFields(
       {
-        name: "Snapshot",
-        value: batch.label,
-      },
-      {
         name: "Membri",
-        value: `${snapshotPage.totalCount}`,
+        value: `${batch.total_members}`,
         inline: true,
       },
       {
         name: "Pagină",
-        value: `${snapshotPage.currentPage} / ${snapshotPage.totalPages}`,
+        value: `${snapshotPage.currentPage}/${snapshotPage.totalPages}`,
         inline: true,
       },
       {
-        name: "Clasament snapshot",
-        value: description,
+        name: "Clasament",
+        value: entries,
       }
     )
-    .setColor(0x9b59b6)
     .setFooter({
-      text: `Creat la ${new Date(batch.createdAt).toLocaleString("ro-RO")}`,
+      text: `Creat la ${new Date(batch.created_at).toLocaleString("ro-RO")}`,
     })
     .setTimestamp();
 }
