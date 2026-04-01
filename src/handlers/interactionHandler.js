@@ -284,7 +284,9 @@ async function handleRequiredNoteModal(interaction) {
 
   const [, targetUserId, activityKey] = parseCustomId(interaction.customId);
   const targetMember = await interaction.guild.members.fetch(targetUserId);
-  const requiredNote = interaction.fields.getTextInputValue("required_note_input").trim();
+  const requiredNote = interaction.fields
+    .getTextInputValue("required_note_input")
+    .trim();
 
   const result = await addPointsEntry({
     guildId: interaction.guild.id,
