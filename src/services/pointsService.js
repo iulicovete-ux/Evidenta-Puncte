@@ -41,16 +41,37 @@ function calculatePoints(activityKey, rawValue = null, optionKey = null) {
   }
 
   if (activity.type === "donation_family") {
-    const donationOption = getDonationOption(activityKey, rawValue);
+    const donationOption = getDonationOption(activityKey, optionKey);
 
     if (!donationOption) {
       throw new Error("Obiectul donat este invalid.");
     }
 
+    if (donationOption.mode === "fixed") {
+      return {
+        pointsAwarded: donationOption.points,
+        hours: null,
+        quantity: null,
+        activityLabelSnapshot: `${activity.label} - ${donationOption.label}`,
+      };
+    }
+
+    const quantity = Number(rawValue);
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      throw new Error("Cantitatea trebuie să fie un număr întreg mai mare ca 0.");
+    }
+
+    if (quantity % donationOption.unitSize !== 0) {
+      throw new Error(
+        `Cantitatea pentru ${donationOption.label} trebuie să fie multiplu de ${donationOption.unitSize}.`
+      );
+    }
+
     return {
-      pointsAwarded: donationOption.points,
+      pointsAwarded: (quantity / donationOption.unitSize) * donationOption.pointsPerUnit,
       hours: null,
-      quantity: null,
+      quantity,
       activityLabelSnapshot: `${activity.label} - ${donationOption.label}`,
     };
   }
