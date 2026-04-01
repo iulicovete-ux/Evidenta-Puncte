@@ -23,10 +23,17 @@ function formatEntry(entry) {
   if (entry.hours !== null) extra = ` • ${entry.hours} ore`;
   if (entry.quantity !== null) extra = ` • ${entry.quantity} cantitate`;
 
-  return `• **${entry.activityLabel}** — **${entry.pointsAwarded} pct**${extra}
-Data: ${date}
-Trecut de: <@${entry.addedByDiscordUserId}>
-${entry.note ? `Notă: ${entry.note}` : ""}`;
+  const ownerLine = entry.addedByDiscordUserId
+    ? `Trecut de: <@${entry.addedByDiscordUserId}>`
+    : "Trecut de: Necunoscut";
+
+  const noteLine = entry.note ? `\nNotă: ${entry.note}` : "";
+
+  return [
+    `• **${entry.activityLabel}** — **${entry.pointsAwarded} pct**${extra}`,
+    `Data: ${date}`,
+    ownerLine + noteLine,
+  ].join("\n");
 }
 
 function buildMemberPointsEmbed(targetMember, summary, pageData) {
@@ -48,11 +55,10 @@ function buildMemberPointsEmbed(targetMember, summary, pageData) {
         name: "Total puncte",
         value: `${summary.totalPoints} pct`,
         inline: true,
-      },
-      {
-        name: `Istoric (pagina ${pageData.currentPage}/${pageData.totalPages})`,
-        value: history,
       }
+    )
+    .setDescription(
+      `**Istoric (pagina ${pageData.currentPage}/${pageData.totalPages})**\n\n${history}`
     )
     .setFooter({ text: "Registrul familiei" })
     .setTimestamp();
