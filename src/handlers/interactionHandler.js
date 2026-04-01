@@ -176,6 +176,12 @@ async function handleDonationSelect(interaction) {
     return;
   }
 
+  if (donationOption.mode === "quantity") {
+    const modal = buildValueModal(targetUserId, activityKey, donationKey);
+    await interaction.showModal(modal);
+    return;
+  }
+
   const targetMember = await interaction.guild.members.fetch(targetUserId);
 
   const result = await addPointsEntry({
@@ -183,7 +189,7 @@ async function handleDonationSelect(interaction) {
     targetMember,
     activityKey,
     addedByDiscordUserId: interaction.user.id,
-    rawValue: donationKey,
+    optionKey: donationKey,
   });
 
   await interaction.update({
@@ -422,7 +428,7 @@ async function handleSnapshotSelect(interaction) {
 
   if (!Number.isInteger(batchId)) {
     await interaction.update({
-      content: "Snapshot invalid.",
+      content: "Perioadă invalidă.",
       embeds: [],
       components: [],
     });
@@ -483,7 +489,7 @@ async function handleResetPointsModal(interaction) {
 
   if (!snapshotLabel) {
     await interaction.reply({
-      content: "Trebuie să introduci un nume pentru snapshot.",
+      content: "Trebuie să introduci un nume pentru perioadă.",
       flags: MessageFlags.Ephemeral,
     });
     return;
