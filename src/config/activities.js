@@ -57,6 +57,12 @@ const ACTIVITIES = {
   },
 
   // ===== FIXED =====
+  actiune_generala: {
+  label: "Acțiune generală",
+  type: "fixed_with_required_note",
+  points: 1,
+},
+  
   postat_anunt: {
     label: "Postat anunț angajare",
     type: "fixed",
