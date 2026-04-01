@@ -10,21 +10,21 @@ const {
 
 function buildResetConfirmationEmbed() {
   return new EmbedBuilder()
-    .setTitle("⚠️ Confirmare reset puncte")
+    .setTitle("⚠️ Închidere săptămână")
     .setDescription(
       [
-        "Ești pe cale să faci resetul săptămânal al punctelor.",
+        "Ești pe cale să închizi evidența punctelor pentru perioada curentă.",
         "",
-        "Ce se va întâmpla:",
-        "• se salvează snapshot-ul totalurilor curente",
-        "• se șterg toate intrările active din perioada curentă",
+        "**Ce se va întâmpla:**",
+        "• totalurile membrilor vor fi salvate",
+        "• registrul actual va fi golit pentru o nouă perioadă",
         "",
-        "După confirmare, vei introduce numele snapshot-ului.",
+        "Înainte de finalizare, vei da un nume acestei perioade.",
         "",
-        "Această acțiune afectează toți membrii serverului.",
+        "Această hotărâre îi privește pe toți membrii familiei.",
       ].join("\n")
     )
-    .setColor(0xe67e22)
+    .setColor(0xf1c40f)
     .setTimestamp();
 }
 
@@ -32,12 +32,12 @@ function buildResetConfirmationRow() {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId("confirm_reset_points")
-      .setLabel("Confirm reset")
+      .setLabel("Închide săptămâna")
       .setStyle(ButtonStyle.Danger),
 
     new ButtonBuilder()
       .setCustomId("cancel_reset_points")
-      .setLabel("Anulează")
+      .setLabel("Renunță")
       .setStyle(ButtonStyle.Secondary)
   );
 }
@@ -45,15 +45,15 @@ function buildResetConfirmationRow() {
 function buildResetSnapshotModal() {
   const modal = new ModalBuilder()
     .setCustomId("reset_points_modal")
-    .setTitle("Nume snapshot reset");
+    .setTitle("Numele perioadei");
 
   const snapshotNameInput = new TextInputBuilder()
     .setCustomId("snapshot_name_input")
-    .setLabel("Numele snapshot-ului")
+    .setLabel("Cum vrei să rămână trecută perioada")
     .setStyle(TextInputStyle.Short)
     .setRequired(true)
     .setMaxLength(100)
-    .setPlaceholder("Ex: Săptămâna 22 - 28 Martie");
+    .setPlaceholder("Ex: Săptămâna 25 - 31 Martie");
 
   modal.addComponents(
     new ActionRowBuilder().addComponents(snapshotNameInput)
@@ -64,26 +64,26 @@ function buildResetSnapshotModal() {
 
 function buildResetResultEmbed(result) {
   return new EmbedBuilder()
-    .setTitle("✅ Reset puncte efectuat")
+    .setTitle("✅ Săptămâna a fost închisă")
     .setColor(0x2ecc71)
     .addFields(
       {
-        name: "Snapshot salvat",
+        name: "Perioadă salvată",
         value: result.batchLabel,
       },
       {
-        name: "Membri salvați în snapshot",
+        name: "Membri trecuți în arhivă",
         value: `${result.snapshotCount}`,
         inline: true,
       },
       {
-        name: "Intrări șterse din perioada curentă",
+        name: "Înregistrări curățate din registru",
         value: `${result.deletedEntriesCount}`,
         inline: true,
       }
     )
     .setFooter({
-      text: "S-a început o perioadă nouă de punctaj",
+      text: "Registrul este pregătit pentru o nouă perioadă",
     })
     .setTimestamp();
 }
