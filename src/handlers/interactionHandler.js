@@ -45,6 +45,7 @@ const {
   buildDonationSelectRow,
   buildDeliverySelectRow,
   buildValueModal,
+  buildRequiredNoteModal,
 } = require("../ui/addPoints");
 const {
   addPointsEntry,
@@ -130,6 +131,12 @@ async function handleActivitySelect(interaction) {
     return;
   }
 
+  if (activity.type === "fixed_with_required_note") {
+    const modal = buildRequiredNoteModal(targetUserId, activityKey);
+    await interaction.showModal(modal);
+    return;
+  }
+
   if (activity.type === "fixed") {
     const targetMember = await interaction.guild.members.fetch(targetUserId);
 
@@ -142,11 +149,11 @@ async function handleActivitySelect(interaction) {
 
     await interaction.update({
       content:
-        `✔️ Activitatea a fost trecută în registru.\n\n` +
-        `**Membru:** ${targetMember.displayName}\n` +
-        `**Activitate:** ${result.activityLabelSnapshot}\n` +
-        `**Puncte acordate:** ${result.pointsAwarded}\n` +
-        `**Trecut de:** <@${interaction.user.id}>`,
+        ✔️ Activitatea a fost trecută în registru.\n\n +
+        **Membru:** ${targetMember.displayName}\n +
+        **Activitate:** ${result.activityLabelSnapshot}\n +
+        **Puncte acordate:** ${result.pointsAwarded}\n +
+        **Trecut de:** <@${interaction.user.id}>,
       components: [],
     });
 
@@ -194,11 +201,11 @@ async function handleDonationSelect(interaction) {
 
   await interaction.update({
     content:
-      `✔️ Activitatea a fost trecută în registru.\n\n` +
-      `**Membru:** ${targetMember.displayName}\n` +
-      `**Activitate:** ${result.activityLabelSnapshot}\n` +
-      `**Puncte acordate:** ${result.pointsAwarded}\n` +
-      `**Trecut de:** <@${interaction.user.id}>`,
+      ✔️ Activitatea a fost trecută în registru.\n\n +
+      **Membru:** ${targetMember.displayName}\n +
+      **Activitate:** ${result.activityLabelSnapshot}\n +
+      **Puncte acordate:** ${result.pointsAwarded}\n +
+      **Trecut de:** <@${interaction.user.id}>,
     components: [],
   });
 }
@@ -251,20 +258,50 @@ async function handleAddPointsModal(interaction) {
 
   const extraInfo =
     result.hours !== null
-      ? `**Ore:** ${result.hours}\n`
+      ? **Ore:** ${result.hours}\n
       : result.quantity !== null
-      ? `**Cantitate:** ${result.quantity}\n`
+      ? **Cantitate:** ${result.quantity}\n
       : "";
 
   await interaction.reply({
     content:
-      `✔️ Activitatea a fost trecută în registru.\n\n` +
-      `**Membru:** ${targetMember.displayName}\n` +
-      `**Activitate:** ${result.activityLabelSnapshot}\n` +
-      `${extraInfo}` +
-      `**Puncte acordate:** ${result.pointsAwarded}\n` +
-      `**Trecut de:** <@${interaction.user.id}>` +
-      (note ? `\n**Notă:** ${note}` : ""),
+      ✔️ Activitatea a fost trecută în registru.\n\n +
+      **Membru:** ${targetMember.displayName}\n +
+      **Activitate:** ${result.activityLabelSnapshot}\n +
+      ${extraInfo} +
+      **Puncte acordate:** ${result.pointsAwarded}\n +
+      **Trecut de:** <@${interaction.user.id}> +
+      (note ? \n**Notă:** ${note} : ""),
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleRequiredNoteModal(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const [, targetUserId, activityKey] = parseCustomId(interaction.customId);
+  const targetMember = await interaction.guild.members.fetch(targetUserId);
+  const requiredNote = interaction.fields.getTextInputValue("required_note_input").trim();
+
+  const result = await addPointsEntry({
+    guildId: interaction.guild.id,
+    targetMember,
+    activityKey,
+    addedByDiscordUserId: interaction.user.id,
+    note: requiredNote,
+  });
+
+  await interaction.reply({
+    content:
+      ✔️ Activitatea a fost trecută în registru.\n\n +
+      **Membru:** ${targetMember.displayName}\n +
+      **Activitate:** ${result.activityLabelSnapshot}\n +
+      **Puncte acordate:** ${result.pointsAwarded}\n +
+      **Trecut de:** <@${interaction.user.id}>\n +
+      **Descriere:** ${requiredNote},
     flags: MessageFlags.Ephemeral,
   });
 }
@@ -315,11 +352,11 @@ async function handleRemovePointsModal(interaction) {
 
   await interaction.reply({
     content:
-      `✔️ Registrul a fost corectat.\n\n` +
-      `**Membru:** ${targetMember.displayName}\n` +
-      `**Puncte scăzute:** ${result.pointsRemoved}\n` +
-      `**Motiv:** ${result.reason}\n` +
-      `**Trecut de:** <@${interaction.user.id}>`,
+      ✔️ Registrul a fost corectat.\n\n +
+      **Membru:** ${targetMember.displayName}\n +
+      **Puncte scăzute:** ${result.pointsRemoved}\n +
+      **Motiv:** ${result.reason}\n +
+      **Trecut de:** <@${interaction.user.id}>,
     flags: MessageFlags.Ephemeral,
   });
 }
@@ -627,6 +664,11 @@ async function handleInteraction(interaction) {
   }
 
   if (interaction.isModalSubmit()) {
+    if (interaction.customId.startsWith("add_points_required_note_modal:")) {
+      await handleRequiredNoteModal(interaction);
+      return;
+    }
+
     if (interaction.customId.startsWith("add_points_modal:")) {
       await handleAddPointsModal(interaction);
       return;
