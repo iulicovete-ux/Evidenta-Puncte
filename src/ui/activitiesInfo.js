@@ -28,7 +28,13 @@ function buildActivitiesInfoEmbed() {
 
     if (activity.type === "donation_family") {
       for (const [, option] of Object.entries(activity.options)) {
-        donations.push(`• ${option.label} — **${option.points} pct**`);
+        if (option.mode === "quantity") {
+          donations.push(
+            `• ${option.label} — **${option.unitSize} buc = ${option.pointsPerUnit} pct**`
+          );
+        } else {
+          donations.push(`• ${option.label} — **${option.points} pct**`);
+        }
       }
     }
   }
@@ -36,7 +42,6 @@ function buildActivitiesInfoEmbed() {
   const embed = new EmbedBuilder()
     .setTitle("📜 Contribuții recunoscute în familie")
     .setColor(0x5865f2)
-
     .addFields(
       {
         name: "💰 Donații familie",
@@ -61,10 +66,10 @@ function buildActivitiesInfoEmbed() {
             "• Orele sunt calculate doar în valori întregi",
             "• Meta este luată în calcul doar în multipli de **50**",
             "• Carduri / LSD doar în multipli de **35**",
+            "• Donațiile de materiale se iau în calcul doar în multiplii pragului cerut",
           ].join("\n"),
       }
     )
-
     .setFooter({
       text: "Registrul familiei",
     })
