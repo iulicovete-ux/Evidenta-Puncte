@@ -45,16 +45,15 @@ function buildMemberPointsEmbed(targetMember, summary, pageData) {
   return new EmbedBuilder()
     .setTitle(`📌 Fișa membrului ${targetMember.displayName}`)
     .setColor(0x3498db)
-
-    .addFields({
-      name: "Total puncte",
-      value: `**${summary.totalPoints} pct**`,
-    })
-
     .setDescription(
-      `**Istoric (pagina ${pageData.currentPage}/${pageData.totalPages})**\n\n${history}`
+      [
+        `**Total puncte:** **${summary.totalPoints} pct**`,
+        "",
+        `**Istoric (pagina ${pageData.currentPage}/${pageData.totalPages})**`,
+        "",
+        history,
+      ].join("\n")
     )
-
     .setFooter({ text: "Registrul familiei" })
     .setTimestamp();
 }
