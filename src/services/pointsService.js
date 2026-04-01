@@ -28,7 +28,7 @@ function calculatePoints(activityKey, rawValue = null, optionKey = null) {
   const activity = getActivity(activityKey);
 
   if (!activity) {
-    throw new Error("Activitate invalidă.");
+    throw new Error("Activitate invalida.");
   }
 
   if (activity.type === "fixed" || activity.type === "fixed_with_required_note") {
@@ -52,27 +52,28 @@ function calculatePoints(activityKey, rawValue = null, optionKey = null) {
         pointsAwarded: donationOption.points,
         hours: null,
         quantity: null,
-        activityLabelSnapshot: ${activity.label} - ${donationOption.label},
+        activityLabelSnapshot: `${activity.label} - ${donationOption.label}`,
       };
     }
 
     const quantity = Number(rawValue);
 
     if (!Number.isInteger(quantity) || quantity <= 0) {
-      throw new Error("Cantitatea trebuie să fie un număr întreg mai mare ca 0.");
+      throw new Error("Cantitatea trebuie sa fie un numar intreg mai mare ca 0.");
     }
 
     if (quantity % donationOption.unitSize !== 0) {
       throw new Error(
-        Cantitatea pentru ${donationOption.label} trebuie să fie multiplu de ${donationOption.unitSize}.
+        `Cantitatea pentru ${donationOption.label} trebuie sa fie multiplu de ${donationOption.unitSize}.`
       );
     }
 
     return {
-      pointsAwarded: (quantity / donationOption.unitSize) * donationOption.pointsPerUnit,
+      pointsAwarded:
+        (quantity / donationOption.unitSize) * donationOption.pointsPerUnit,
       hours: null,
       quantity,
-      activityLabelSnapshot: ${activity.label} - ${donationOption.label},
+      activityLabelSnapshot: `${activity.label} - ${donationOption.label}`,
     };
   }
 
@@ -80,7 +81,7 @@ function calculatePoints(activityKey, rawValue = null, optionKey = null) {
     const hours = Number(rawValue);
 
     if (!Number.isInteger(hours) || hours <= 0) {
-      throw new Error("Orele trebuie să fie un număr întreg mai mare ca 0.");
+      throw new Error("Orele trebuie sa fie un numar intreg mai mare ca 0.");
     }
 
     return {
@@ -95,26 +96,27 @@ function calculatePoints(activityKey, rawValue = null, optionKey = null) {
     const deliveryOption = getDeliveryOption(activityKey, optionKey);
 
     if (!deliveryOption) {
-      throw new Error("Tipul livrării este invalid.");
+      throw new Error("Tipul livrarii este invalid.");
     }
 
     const quantity = Number(rawValue);
 
     if (!Number.isInteger(quantity) || quantity <= 0) {
-      throw new Error("Cantitatea trebuie să fie un număr întreg mai mare ca 0.");
+      throw new Error("Cantitatea trebuie sa fie un numar intreg mai mare ca 0.");
     }
 
     if (quantity % deliveryOption.unitSize !== 0) {
       throw new Error(
-        Cantitatea pentru ${deliveryOption.label} trebuie să fie multiplu de ${deliveryOption.unitSize}.
+        `Cantitatea pentru ${deliveryOption.label} trebuie sa fie multiplu de ${deliveryOption.unitSize}.`
       );
     }
 
     return {
-      pointsAwarded: (quantity / deliveryOption.unitSize) * deliveryOption.pointsPerUnit,
+      pointsAwarded:
+        (quantity / deliveryOption.unitSize) * deliveryOption.pointsPerUnit,
       hours: null,
       quantity,
-      activityLabelSnapshot: ${activity.label} - ${deliveryOption.label},
+      activityLabelSnapshot: `${activity.label} - ${deliveryOption.label}`,
     };
   }
 
@@ -133,14 +135,14 @@ async function addPointsEntry({
   const activity = getActivity(activityKey);
 
   if (!activity) {
-    throw new Error("Activitatea selectată nu există.");
+    throw new Error("Activitatea selectata nu exista.");
   }
 
   if (activity.type === "fixed_with_required_note") {
     const cleanNote = String(note || "").trim();
 
     if (!cleanNote) {
-      throw new Error("Descrierea este obligatorie pentru această activitate.");
+      throw new Error("Descrierea este obligatorie pentru aceasta activitate.");
     }
   }
 
@@ -196,7 +198,9 @@ async function addNegativeAdjustmentEntry({
   const parsedPoints = Number(pointsToRemove);
 
   if (!Number.isInteger(parsedPoints) || parsedPoints <= 0) {
-    throw new Error("Numărul de puncte de scăzut trebuie să fie un număr întreg mai mare ca 0.");
+    throw new Error(
+      "Numarul de puncte de scazut trebuie sa fie un numar intreg mai mare ca 0."
+    );
   }
 
   const cleanReason = String(reason || "").trim();
@@ -227,7 +231,7 @@ async function addNegativeAdjustmentEntry({
       guildId,
       targetMember.id,
       "manual_adjustment_negative",
-      "Corecție puncte",
+      "Corectie puncte",
       "adjustment",
       negativePoints,
       removedByDiscordUserId,
