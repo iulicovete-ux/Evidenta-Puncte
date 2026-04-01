@@ -109,7 +109,7 @@ async function handleActivitySelect(interaction) {
 
   if (!activity) {
     await interaction.reply({
-      content: "Activitatea selectata nu exista.",
+      content: "Activitatea selectată nu există.",
       flags: MessageFlags.Ephemeral,
     });
     return;
@@ -125,7 +125,7 @@ async function handleActivitySelect(interaction) {
 
   if (activity.type === "delivery_quantity") {
     await interaction.update({
-      content: "Alege tipul livrarii.",
+      content: "Alege tipul livrării.",
       components: [buildDeliverySelectRow(targetUserId, activityKey)],
     });
     return;
@@ -149,7 +149,7 @@ async function handleActivitySelect(interaction) {
 
     await interaction.update({
       content:
-        "Activitatea a fost trecuta in registru.\n\n" +
+        Activitatea a fost trecută în registru.\n\n +
         Membru: ${targetMember.displayName}\n +
         Activitate: ${result.activityLabelSnapshot}\n +
         Puncte acordate: ${result.pointsAwarded}\n +
@@ -177,7 +177,7 @@ async function handleDonationSelect(interaction) {
 
   if (!donationOption) {
     await interaction.reply({
-      content: "Obiectul donat selectat nu exista.",
+      content: "Obiectul donat selectat nu există.",
       flags: MessageFlags.Ephemeral,
     });
     return;
@@ -201,7 +201,7 @@ async function handleDonationSelect(interaction) {
 
   await interaction.update({
     content:
-      "Activitatea a fost trecuta in registru.\n\n" +
+      Activitatea a fost trecută în registru.\n\n +
       Membru: ${targetMember.displayName}\n +
       Activitate: ${result.activityLabelSnapshot}\n +
       Puncte acordate: ${result.pointsAwarded}\n +
@@ -265,7 +265,7 @@ async function handleAddPointsModal(interaction) {
 
   await interaction.reply({
     content:
-      "Activitatea a fost trecuta in registru.\n\n" +
+      Activitatea a fost trecută în registru.\n\n +
       Membru: ${targetMember.displayName}\n +
       Activitate: ${result.activityLabelSnapshot}\n +
       ${extraInfo} +
@@ -298,7 +298,7 @@ async function handleRequiredNoteModal(interaction) {
 
   await interaction.reply({
     content:
-      "Activitatea a fost trecuta in registru.\n\n" +
+      Activitatea a fost trecută în registru.\n\n +
       Membru: ${targetMember.displayName}\n +
       Activitate: ${result.activityLabelSnapshot}\n +
       Puncte acordate: ${result.pointsAwarded}\n +
@@ -354,11 +354,11 @@ async function handleRemovePointsModal(interaction) {
 
   await interaction.reply({
     content:
-      ✔️ Registrul a fost corectat.\n\n +
-      **Membru:** ${targetMember.displayName}\n +
-      **Puncte scăzute:** ${result.pointsRemoved}\n +
-      **Motiv:** ${result.reason}\n +
-      **Trecut de:** <@${interaction.user.id}>,
+      Registrul a fost corectat.\n\n +
+      Membru: ${targetMember.displayName}\n +
+      Puncte scăzute: ${result.pointsRemoved}\n +
+      Motiv: ${result.reason}\n +
+      Trecut de: <@${interaction.user.id}>,
     flags: MessageFlags.Ephemeral,
   });
 }
