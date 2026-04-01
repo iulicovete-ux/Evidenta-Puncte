@@ -19,7 +19,7 @@ function buildSnapshotSelectRow(batches) {
 
   const select = new StringSelectMenuBuilder()
     .setCustomId("points_history_snapshot_select")
-    .setPlaceholder("Alege perioada...")
+    .setPlaceholder("Alege perioada")
     .addOptions(options);
 
   return new ActionRowBuilder().addComponents(select);
@@ -27,8 +27,8 @@ function buildSnapshotSelectRow(batches) {
 
 function buildNoSnapshotsEmbed() {
   return new EmbedBuilder()
-    .setTitle("🗂️ Istoric puncte")
-    .setDescription("Nu există încă snapshot-uri salvate.")
+    .setTitle("📁 Istoric puncte")
+    .setDescription("Nu există încă perioade salvate.")
     .setColor(0x95a5a6)
     .setTimestamp();
 }
@@ -38,8 +38,8 @@ function buildSnapshotEntriesEmbed(batch, snapshotPage) {
     snapshotPage.entries.length > 0
       ? snapshotPage.entries
           .map(
-            (entry, index) =>
-              `#${(snapshotPage.currentPage - 1) * 10 + index + 1} — ${entry.display_name} • **${entry.total_points} pct** (${entry.entries_count} intrări)`
+            (entry) =>
+              `#${entry.rank} — ${entry.displayName} • **${entry.totalPoints} pct** (${entry.entriesCount} intrări)`
           )
           .join("\n")
       : "Nu există date pentru această perioadă.";
@@ -50,7 +50,7 @@ function buildSnapshotEntriesEmbed(batch, snapshotPage) {
     .addFields(
       {
         name: "Membri",
-        value: `${batch.total_members}`,
+        value: `${snapshotPage.totalCount}`,
         inline: true,
       },
       {
@@ -64,7 +64,7 @@ function buildSnapshotEntriesEmbed(batch, snapshotPage) {
       }
     )
     .setFooter({
-      text: `Creat la ${new Date(batch.created_at).toLocaleString("ro-RO")}`,
+      text: `Creat la ${new Date(batch.createdAt).toLocaleString("ro-RO")}`,
     })
     .setTimestamp();
 }
