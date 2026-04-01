@@ -387,7 +387,7 @@ async function showSnapshotPage(interaction, batchId, page) {
 
   if (!batch) {
     const payload = {
-      content: "Snapshot-ul selectat nu mai există.",
+      content: "Perioada selectată nu mai există.",
       flags: MessageFlags.Ephemeral,
     };
 
@@ -403,7 +403,7 @@ async function showSnapshotPage(interaction, batchId, page) {
   const snapshotPage = await getSnapshotEntries(batchId, page, 10);
 
   await interaction.update({
-    content: `Aici ai arhiva pentru **${batch.label}**.`,
+    content: null, // 🔥 eliminăm textul de sus
     embeds: [buildSnapshotEntriesEmbed(batch, snapshotPage)],
     components: [
       buildSnapshotPaginationRow(
