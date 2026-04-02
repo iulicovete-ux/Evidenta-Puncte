@@ -28,6 +28,19 @@ const {
   buildRemovePointsUserSelectRow,
   buildRemovePointsModal,
 } = require("../ui/removePoints");
+const {
+  buildAddCreditsUserSelectRow,
+  buildCreditActivitySelectRow,
+} = require("../ui/addCredits");
+const {
+  buildRemoveCreditsUserSelectRow,
+  buildRemoveCreditsModal,
+} = require("../ui/removeCredits");
+const {
+  buildMemberCreditsUserSelectRow,
+  buildMemberCreditsEmbed,
+  buildCreditsPaginationRow,
+} = require("../ui/memberCredits");
 const { getLeaderboard } = require("../services/leaderboardService");
 const {
   getMemberPointsSummary,
@@ -51,6 +64,12 @@ const {
   addPointsEntry,
   addNegativeAdjustmentEntry,
 } = require("../services/pointsService");
+const {
+  addCreditEntry,
+  removeCreditEntry,
+  getMemberCreditsSummary,
+  getMemberCreditsPage,
+} = require("../services/creditsService");
 
 function parseCustomId(customId) {
   return customId.split(":");
@@ -363,6 +382,157 @@ async function handleRemovePointsModal(interaction) {
   });
 }
 
+async function handleAddCreditsButton(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  await interaction.reply({
+    content: "Alege membrul pentru care vrei să adaugi credite.",
+    components: [buildAddCreditsUserSelectRow()],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleAddCreditsUserSelect(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const targetUserId = interaction.values[0];
+
+  await interaction.update({
+    content: "Alege activitatea care acordă 1 credit.",
+    components: [buildCreditActivitySelectRow(targetUserId)],
+  });
+}
+
+async function handleCreditActivitySelect(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const [, targetUserId] = parseCustomId(interaction.customId);
+  const activityKey = interaction.values[0];
+  const targetMember = await interaction.guild.members.fetch(targetUserId);
+
+  const result = await addCreditEntry({
+    guildId: interaction.guild.id,
+    targetMember,
+    activityKey,
+    addedByDiscordUserId: interaction.user.id,
+  });
+
+  await interaction.update({
+    content:
+      `Creditele au fost actualizate.\n\n` +
+      `Membru: ${targetMember.displayName}\n` +
+      `Activitate: ${result.activityLabel}\n` +
+      `Credite acordate: ${result.creditsAwarded}\n` +
+      `Trecut de: <@${interaction.user.id}>`,
+    components: [],
+  });
+}
+
+async function handleRemoveCreditsButton(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  await interaction.reply({
+    content: "Selectează membrul căruia vrei să-i scoți credite.",
+    components: [buildRemoveCreditsUserSelectRow()],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleRemoveCreditsUserSelect(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const targetUserId = interaction.values[0];
+  const modal = buildRemoveCreditsModal(targetUserId);
+  await interaction.showModal(modal);
+}
+
+async function handleRemoveCreditsModal(interaction) {
+  if (!canManagePoints(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const [, targetUserId] = parseCustomId(interaction.customId);
+  const targetMember = await interaction.guild.members.fetch(targetUserId);
+
+  const creditsInput = interaction.fields.getTextInputValue("credits_input");
+  const reasonInput = interaction.fields.getTextInputValue("reason_input");
+
+  const result = await removeCreditEntry({
+    guildId: interaction.guild.id,
+    targetMember,
+    removedByDiscordUserId: interaction.user.id,
+    creditsToRemove: creditsInput,
+    reason: reasonInput,
+  });
+
+  await interaction.reply({
+    content:
+      `Creditele au fost corectate.\n\n` +
+      `Membru: ${targetMember.displayName}\n` +
+      `Credite scăzute: ${result.creditsRemoved}\n` +
+      `Motiv: ${result.reason}\n` +
+      `Trecut de: <@${interaction.user.id}>`,
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleMemberCreditsButton(interaction) {
+  await interaction.reply({
+    content: "Alege membrul pe care vrei să-l verifici.",
+    components: [buildMemberCreditsUserSelectRow()],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleMemberCreditsUserSelect(interaction) {
+  const userId = interaction.values[0];
+  const member = await interaction.guild.members.fetch(userId);
+
+  const summary = await getMemberCreditsSummary(userId);
+  const pageData = await getMemberCreditsPage(userId, 1);
+
+  await interaction.update({
+    content: "Aici ai totalul și istoricul creditelor pentru membrul ales.",
+    embeds: [buildMemberCreditsEmbed(member, summary, pageData)],
+    components: [
+      buildCreditsPaginationRow(userId, pageData.currentPage, pageData.totalPages),
+    ],
+  });
+}
+
+async function handleMemberCreditsPagination(interaction) {
+  const [, userId, pageRaw] = parseCustomId(interaction.customId);
+  const page = Number(pageRaw);
+
+  const member = await interaction.guild.members.fetch(userId);
+  const summary = await getMemberCreditsSummary(userId);
+  const pageData = await getMemberCreditsPage(userId, page);
+
+  await interaction.update({
+    content: "Aici ai totalul și istoricul creditelor pentru membrul ales.",
+    embeds: [buildMemberCreditsEmbed(member, summary, pageData)],
+    components: [
+      buildCreditsPaginationRow(userId, pageData.currentPage, pageData.totalPages),
+    ],
+  });
+}
+
 async function handleLeaderboard(interaction) {
   const entries = await getLeaderboard(100);
 
@@ -571,6 +741,16 @@ async function handleInteraction(interaction) {
       return;
     }
 
+    if (interaction.customId === "add_credits") {
+      await handleAddCreditsButton(interaction);
+      return;
+    }
+
+    if (interaction.customId === "remove_credits") {
+      await handleRemoveCreditsButton(interaction);
+      return;
+    }
+
     if (interaction.customId === "leaderboard") {
       await handleLeaderboard(interaction);
       return;
@@ -578,6 +758,11 @@ async function handleInteraction(interaction) {
 
     if (interaction.customId === "member_points") {
       await handleMemberPointsButton(interaction);
+      return;
+    }
+
+    if (interaction.customId === "member_credits") {
+      await handleMemberCreditsButton(interaction);
       return;
     }
 
@@ -624,6 +809,14 @@ async function handleInteraction(interaction) {
       await handleMemberPagination(interaction);
       return;
     }
+
+    if (
+      interaction.customId.startsWith("credits_prev:") ||
+      interaction.customId.startsWith("credits_next:")
+    ) {
+      await handleMemberCreditsPagination(interaction);
+      return;
+    }
   }
 
   if (interaction.isUserSelectMenu()) {
@@ -641,6 +834,21 @@ async function handleInteraction(interaction) {
       await handleRemovePointsUserSelect(interaction);
       return;
     }
+
+    if (interaction.customId === "add_credits_user_select") {
+      await handleAddCreditsUserSelect(interaction);
+      return;
+    }
+
+    if (interaction.customId === "remove_credits_user_select") {
+      await handleRemoveCreditsUserSelect(interaction);
+      return;
+    }
+
+    if (interaction.customId === "member_credits_user_select") {
+      await handleMemberCreditsUserSelect(interaction);
+      return;
+    }
   }
 
   if (interaction.isStringSelectMenu()) {
@@ -656,6 +864,11 @@ async function handleInteraction(interaction) {
 
     if (interaction.customId.startsWith("add_points_delivery:")) {
       await handleDeliverySelect(interaction);
+      return;
+    }
+
+    if (interaction.customId.startsWith("add_credits_activity:")) {
+      await handleCreditActivitySelect(interaction);
       return;
     }
 
@@ -678,6 +891,11 @@ async function handleInteraction(interaction) {
 
     if (interaction.customId.startsWith("remove_points_modal:")) {
       await handleRemovePointsModal(interaction);
+      return;
+    }
+
+    if (interaction.customId.startsWith("remove_credits_modal:")) {
+      await handleRemoveCreditsModal(interaction);
       return;
     }
 
