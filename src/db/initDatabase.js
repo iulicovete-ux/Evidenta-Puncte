@@ -35,6 +35,20 @@ async function initDatabase() {
     `);
 
     await pool.query(`
+      CREATE TABLE IF NOT EXISTS credit_entries (
+        id SERIAL PRIMARY KEY,
+        guild_id TEXT NOT NULL,
+        discord_user_id TEXT NOT NULL,
+        activity_key TEXT NOT NULL,
+        activity_label TEXT NOT NULL,
+        credits_awarded INTEGER NOT NULL,
+        added_by_discord_user_id TEXT NOT NULL,
+        note TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS snapshot_batches (
         id SERIAL PRIMARY KEY,
         guild_id TEXT NOT NULL,
