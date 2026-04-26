@@ -1,3 +1,4 @@
+// src/config/activities.js
 const ACTIVITIES = {
   // ===== SPECIAL =====
   donatii_familie: {
@@ -30,39 +31,44 @@ const ACTIVITIES = {
       },
       baterie: {
         label: "Baterie",
-        mode: "fixed",
-        points: 1,
+        mode: "quantity",
+        unitSize: 1,
+        pointsPerUnit: 1,
       },
       placa: {
         label: "Placă",
-        mode: "fixed",
-        points: 1,
+        mode: "quantity",
+        unitSize: 1,
+        pointsPerUnit: 1,
       },
       fire: {
         label: "Fire",
-        mode: "fixed",
-        points: 1,
+        mode: "quantity",
+        unitSize: 1,
+        pointsPerUnit: 1,
       },
       gps_tracker: {
         label: "GPS Tracker",
-        mode: "fixed",
-        points: 5,
+        mode: "quantity",
+        unitSize: 1,
+        pointsPerUnit: 5,
       },
       hacking_device: {
         label: "Hacking Device",
-        mode: "fixed",
-        points: 5,
+        mode: "quantity",
+        unitSize: 1,
+        pointsPerUnit: 5,
       },
     },
   },
 
   // ===== FIXED =====
   actiune_generala: {
-  label: "Acțiune generală",
-  type: "fixed_with_required_note",
-  points: 1,
-},
-  
+    label: "Acțiune generală",
+    type: "fixed_with_required_note",
+    points: 1,
+  },
+
   postat_anunt: {
     label: "Postat anunț angajare",
     type: "fixed",
