@@ -19,7 +19,7 @@ const ACTIVITIES = {
       polimer: {
         label: "Polimer",
         mode: "quantity",
-        unitSize: 150,
+        unitSize: 500,
         pointsPerUnit: 3,
       },
       fosfor: {
