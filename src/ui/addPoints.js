@@ -1,10 +1,11 @@
+// src/ui/addPoints.js
 const {
   ActionRowBuilder,
-  UserSelectMenuBuilder,
-  StringSelectMenuBuilder,
   ModalBuilder,
+  StringSelectMenuBuilder,
   TextInputBuilder,
   TextInputStyle,
+  UserSelectMenuBuilder,
 } = require("discord.js");
 const { getAllActivities, getActivity } = require("../config/activities");
 
@@ -22,18 +23,16 @@ function buildActivitySelectRow(targetUserId) {
   const activities = getAllActivities();
 
   const options = Object.entries(activities).map(([key, value]) => {
-    let description = "Alege activitatea";
+    let description = "Activitate directă";
 
-    if (value.type === "fixed") {
-      description = `${value.points} pct`;
-    } else if (value.type === "fixed_with_required_note") {
-      description = `${value.points} pct • necesita descriere`;
-    } else if (value.type === "hourly") {
-      description = `${value.pointsPerUnit} pct / ora`;
+    if (value.type === "hourly") {
+      description = "Introduci numărul de ore";
     } else if (value.type === "donation_family") {
-      description = "Alegi obiectul si cantitatea";
+      description = "Alegi obiectul și cantitatea";
     } else if (value.type === "delivery_quantity") {
-      description = "Alegi tipul si cantitatea";
+      description = "Alegi tipul și cantitatea";
+    } else if (value.type === "fixed_with_required_note") {
+      description = "Activitate directă cu descriere obligatorie";
     }
 
     return {
@@ -55,25 +54,18 @@ function buildDonationSelectRow(targetUserId, activityKey) {
   const activity = getActivity(activityKey);
 
   if (!activity || activity.type !== "donation_family") {
-    throw new Error("Activitate invalida pentru selectia donatiei.");
+    throw new Error("Activitate invalidă pentru selecția donației.");
   }
 
-  const options = Object.entries(activity.options).map(([key, value]) => {
-    const description =
-      value.mode === "quantity"
-        ? `${value.unitSize} buc = ${value.pointsPerUnit} pct`
-        : `${value.points} pct`;
-
-    return {
-      label: value.label,
-      value: key,
-      description,
-    };
-  });
+  const options = Object.entries(activity.options).map(([key, value]) => ({
+    label: value.label,
+    value: key,
+    description: `${value.unitSize} buc = ${value.pointsPerUnit} pct`,
+  }));
 
   const selectMenu = new StringSelectMenuBuilder()
     .setCustomId(`add_points_donation:${targetUserId}:${activityKey}`)
-    .setPlaceholder("Selecteaza obiectul donat")
+    .setPlaceholder("Selectează obiectul donat")
     .addOptions(options);
 
   return new ActionRowBuilder().addComponents(selectMenu);
@@ -83,7 +75,7 @@ function buildDeliverySelectRow(targetUserId, activityKey) {
   const activity = getActivity(activityKey);
 
   if (!activity || activity.type !== "delivery_quantity") {
-    throw new Error("Activitate invalida pentru selectia livrarii.");
+    throw new Error("Activitate invalidă pentru selecția livrării.");
   }
 
   const options = Object.entries(activity.options).map(([key, value]) => ({
@@ -94,7 +86,7 @@ function buildDeliverySelectRow(targetUserId, activityKey) {
 
   const selectMenu = new StringSelectMenuBuilder()
     .setCustomId(`add_points_delivery:${targetUserId}:${activityKey}`)
-    .setPlaceholder("Selecteaza tipul livrarii")
+    .setPlaceholder("Selectează tipul livrării")
     .addOptions(options);
 
   return new ActionRowBuilder().addComponents(selectMenu);
@@ -104,7 +96,7 @@ function buildValueModal(targetUserId, activityKey, optionKey = null) {
   const activity = getActivity(activityKey);
 
   if (!activity) {
-    throw new Error("Activitate invalida pentru modal.");
+    throw new Error("Activitate invalidă pentru modal.");
   }
 
   const modalId = optionKey
@@ -113,13 +105,13 @@ function buildValueModal(targetUserId, activityKey, optionKey = null) {
 
   const modal = new ModalBuilder()
     .setCustomId(modalId)
-    .setTitle(`Adauga puncte - ${activity.label}`);
+    .setTitle(`Adaugă puncte - ${activity.label}`);
 
   let valueLabel = "Cantitate";
   let placeholder = "Introdu valoarea";
 
   if (activity.type === "hourly") {
-    valueLabel = "Numar ore";
+    valueLabel = "Număr ore";
     placeholder = "Ex: 3";
   }
 
@@ -141,11 +133,14 @@ function buildValueModal(targetUserId, activityKey, optionKey = null) {
     const selectedOption = activity.options?.[optionKey];
 
     if (!selectedOption) {
-      throw new Error("Obiect de donatie invalid pentru modal.");
+      throw new Error("Obiect de donație invalid pentru modal.");
     }
 
-    if (selectedOption.mode === "quantity") {
-      valueLabel = `Cantitate ${selectedOption.label}`;
+    valueLabel = `Cantitate ${selectedOption.label}`;
+
+    if (selectedOption.unitSize === 1) {
+      placeholder = "Ex: 1, 2, 3...";
+    } else {
       placeholder = `Multiplu de ${selectedOption.unitSize}`;
     }
   }
@@ -159,10 +154,10 @@ function buildValueModal(targetUserId, activityKey, optionKey = null) {
 
   const noteInput = new TextInputBuilder()
     .setCustomId("note_input")
-    .setLabel("Nota (optional)")
+    .setLabel("Notă (opțional)")
     .setStyle(TextInputStyle.Short)
     .setRequired(false)
-    .setPlaceholder("Ex: tura seara / livrare centru");
+    .setPlaceholder("Ex: tură seară / livrare centru");
 
   modal.addComponents(
     new ActionRowBuilder().addComponents(valueInput),
@@ -176,26 +171,24 @@ function buildRequiredNoteModal(targetUserId, activityKey) {
   const activity = getActivity(activityKey);
 
   if (!activity) {
-    throw new Error("Activitate invalida pentru modal.");
+    throw new Error("Activitate invalidă pentru modal.");
   }
 
   const modal = new ModalBuilder()
     .setCustomId(`add_points_required_note_modal:${targetUserId}:${activityKey}`)
-    .setTitle(`Adauga puncte - ${activity.label}`);
+    .setTitle(`Adaugă puncte - ${activity.label}`);
 
   const descriptionInput = new TextInputBuilder()
     .setCustomId("required_note_input")
-    .setLabel("Ce actiune a avut loc")
+    .setLabel("Ce acțiune a avut loc")
     .setStyle(TextInputStyle.Paragraph)
     .setRequired(true)
     .setMaxLength(300)
     .setPlaceholder(
-      "Ex: re-stock la magazin, mutare materiale, ajutor spontan la locatie"
+      "Ex: re-stock la magazin, mutare materiale, ajutor spontan la locație"
     );
 
-  modal.addComponents(
-    new ActionRowBuilder().addComponents(descriptionInput)
-  );
+  modal.addComponents(new ActionRowBuilder().addComponents(descriptionInput));
 
   return modal;
 }
