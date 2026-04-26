@@ -1,3 +1,4 @@
+// src/ui/activitiesInfo.js
 const { EmbedBuilder } = require("discord.js");
 const { getAllActivities } = require("../config/activities");
 
@@ -11,6 +12,10 @@ function buildActivitiesInfoEmbed() {
 
   for (const [, activity] of Object.entries(activities)) {
     if (activity.type === "fixed") {
+      fixed.push(`• ${activity.label} — **${activity.points} pct**`);
+    }
+
+    if (activity.type === "fixed_with_required_note") {
       fixed.push(`• ${activity.label} — **${activity.points} pct**`);
     }
 
@@ -28,13 +33,9 @@ function buildActivitiesInfoEmbed() {
 
     if (activity.type === "donation_family") {
       for (const [, option] of Object.entries(activity.options)) {
-        if (option.mode === "quantity") {
-          donations.push(
-            `• ${option.label} — **${option.unitSize} buc = ${option.pointsPerUnit} pct**`
-          );
-        } else {
-          donations.push(`• ${option.label} — **${option.points} pct**`);
-        }
+        donations.push(
+          `• ${option.label} — **${option.unitSize} buc = ${option.pointsPerUnit} pct**`
+        );
       }
     }
   }
@@ -61,13 +62,13 @@ function buildActivitiesInfoEmbed() {
       },
       {
         name: "⚖️ Reguli de evidență",
-        value:
-          [
-            "• Orele sunt calculate doar în valori întregi",
-            "• Meta este luată în calcul doar în multipli de **50**",
-            "• Carduri / LSD doar în multipli de **35**",
-            "• Donațiile de materiale se iau în calcul doar în multiplii pragului cerut",
-          ].join("\n"),
+        value: [
+          "• Orele sunt calculate doar în valori întregi",
+          "• Meta este luată în calcul doar în multipli de **50**",
+          "• Carduri / LSD doar în multipli de **35**",
+          "• Donațiile de materiale se iau în calcul doar în multiplii pragului cerut",
+          "• Baterie / Placă / Fire / GPS Tracker / Hacking Device acceptă și cantitate introdusă manual",
+        ].join("\n"),
       }
     )
     .setFooter({
