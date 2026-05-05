@@ -185,6 +185,34 @@ async function getMemberCreditsPage(discordUserId, page = 1, pageSize = 10) {
   };
 }
 
+async function getCreditsLeaderboard(limit = 100) {
+  const safeLimit = Number.isInteger(limit) && limit > 0 ? limit : 100;
+
+  const result = await pool.query(
+    `
+      SELECT
+        u.discord_user_id,
+        u.display_name,
+        COALESCE(SUM(c.credits_awarded), 0) AS total_credits,
+        RANK() OVER (ORDER BY COALESCE(SUM(c.credits_awarded), 0) DESC) AS rank
+      FROM credit_entries c
+      LEFT JOIN users u ON u.discord_user_id = c.discord_user_id
+      GROUP BY u.discord_user_id, u.display_name
+      HAVING COALESCE(SUM(c.credits_awarded), 0) <> 0
+      ORDER BY total_credits DESC
+      LIMIT $1
+    `,
+    [safeLimit]
+  );
+
+  return result.rows.map((row) => ({
+    rank: Number(row.rank),
+    discordUserId: row.discord_user_id,
+    displayName: row.display_name || `<@${row.discord_user_id}>`,
+    totalCredits: Number(row.total_credits),
+  }));
+}
+
 async function resetAllCredits(guildId) {
   const result = await pool.query(
     `
@@ -204,5 +232,6 @@ module.exports = {
   removeCreditEntry,
   getMemberCreditsSummary,
   getMemberCreditsPage,
+  getCreditsLeaderboard,
   resetAllCredits,
 };
