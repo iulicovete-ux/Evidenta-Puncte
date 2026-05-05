@@ -17,7 +17,8 @@ function buildMainPanel() {
         "• **Scade puncte unui membru** — corectezi o evidență trecută greșit",
         "• **Adaugă credite unui membru** — treci una dintre activitățile care acordă credit",
         "• **Scade credite unui membru** — corectezi sau consumi creditele unui membru",
-        "• **Clasamentul familiei** — vezi ordinea membrilor după contribuție",
+        "• **Clasament Puncte** — vezi ordinea membrilor după punctele acumulate",
+        "• **Clasament Credite** — vezi ordinea membrilor după creditele acumulate",
         "• **Fișa unui membru** — vezi totalul și evidența lui curentă",
         "• **Creditele unui membru** — vezi totalul și istoricul creditelor",
         "• **Arhiva familiei** — vezi săptămânile salvate după ședință",
@@ -43,8 +44,13 @@ function buildMainPanel() {
 
     new ButtonBuilder()
       .setCustomId("leaderboard")
-      .setLabel("Clasamentul familiei")
-      .setStyle(ButtonStyle.Primary)
+      .setLabel("Clasament Puncte")
+      .setStyle(ButtonStyle.Primary),
+
+    new ButtonBuilder()
+      .setCustomId("leaderboard_credits")
+      .setLabel("Clasament Credite")
+      .setStyle(ButtonStyle.Secondary)
   );
 
   const row2 = new ActionRowBuilder().addComponents(
