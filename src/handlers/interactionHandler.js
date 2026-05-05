@@ -80,6 +80,7 @@ const {
   getMemberCreditsSummary,
   getMemberCreditsPage,
   resetAllCredits,
+  getCreditsLeaderboard,
 } = require("../services/creditsService");
 
 function parseCustomId(customId) {
@@ -447,7 +448,6 @@ async function handleCreditActivitySelect(interaction) {
     components: [],
   });
 }
-
 async function handleRemoveCreditsButton(interaction) {
   if (!canManagePoints(interaction.member)) {
     await replyNoPermission(interaction);
@@ -548,7 +548,16 @@ async function handleLeaderboard(interaction) {
   const entries = await getLeaderboard(100);
 
   await interaction.reply({
-    embeds: [buildLeaderboardEmbed(entries)],
+    embeds: [buildLeaderboardEmbed(entries, "points")],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleCreditsLeaderboard(interaction) {
+  const entries = await getCreditsLeaderboard(100);
+
+  await interaction.reply({
+    embeds: [buildLeaderboardEmbed(entries, "credits")],
     flags: MessageFlags.Ephemeral,
   });
 }
@@ -803,6 +812,11 @@ async function handleInteraction(interaction) {
 
     if (interaction.customId === "leaderboard") {
       await handleLeaderboard(interaction);
+      return;
+    }
+
+    if (interaction.customId === "leaderboard_credits") {
+      await handleCreditsLeaderboard(interaction);
       return;
     }
 
