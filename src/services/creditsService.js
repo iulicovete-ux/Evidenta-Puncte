@@ -185,9 +185,24 @@ async function getMemberCreditsPage(discordUserId, page = 1, pageSize = 10) {
   };
 }
 
+async function resetAllCredits(guildId) {
+  const result = await pool.query(
+    `
+      DELETE FROM credit_entries
+      WHERE guild_id = $1
+    `,
+    [guildId]
+  );
+
+  return {
+    deletedRows: result.rowCount,
+  };
+}
+
 module.exports = {
   addCreditEntry,
   removeCreditEntry,
   getMemberCreditsSummary,
   getMemberCreditsPage,
+  resetAllCredits,
 };
