@@ -23,6 +23,7 @@ function buildMainPanel() {
         "• **Arhiva familiei** — vezi săptămânile salvate după ședință",
         "• **Lista activităților recunoscute** — vezi ce contribuții sunt luate în seamă și cât valorează",
         "• **Închide săptămâna** — salvezi situația actuală și deschizi o perioadă nouă",
+        "• **Resetează credite** — șterge toate creditele membrilor",
       ].join("\n")
     )
     .setColor(0x00ae86)
@@ -84,7 +85,12 @@ function buildMainPanel() {
     new ButtonBuilder()
       .setCustomId("reset_points")
       .setLabel("Închide săptămâna")
-      .setStyle(ButtonStyle.Secondary)
+      .setStyle(ButtonStyle.Secondary),
+
+    new ButtonBuilder()
+      .setCustomId("reset_credits")
+      .setLabel("Resetează credite")
+      .setStyle(ButtonStyle.Danger)
   );
 
   return {
