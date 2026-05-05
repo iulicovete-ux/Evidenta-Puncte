@@ -4,7 +4,11 @@ const {
   getDonationOption,
   getDeliveryOption,
 } = require("../config/activities");
-const { canManagePoints, canResetPoints } = require("../config/permissions");
+const {
+  canManagePoints,
+  canResetPoints,
+  canResetCredits,
+} = require("../config/permissions");
 const { buildActivitiesInfoEmbed } = require("../ui/activitiesInfo");
 const { buildLeaderboardEmbed } = require("../ui/leaderboard");
 const {
@@ -18,6 +22,12 @@ const {
   buildResetSnapshotModal,
   buildResetResultEmbed,
 } = require("../ui/resetPoints");
+const {
+  buildResetCreditsConfirmEmbed,
+  buildResetCreditsButtons,
+  buildResetCreditsSuccessEmbed,
+  buildResetCreditsCancelEmbed,
+} = require("../ui/resetCredits");
 const {
   buildSnapshotSelectRow,
   buildNoSnapshotsEmbed,
@@ -69,6 +79,7 @@ const {
   removeCreditEntry,
   getMemberCreditsSummary,
   getMemberCreditsPage,
+  resetAllCredits,
 } = require("../services/creditsService");
 
 function parseCustomId(customId) {
@@ -729,6 +740,45 @@ async function handleCancelResetPoints(interaction) {
   });
 }
 
+async function handleResetCreditsButton(interaction) {
+  if (!canResetCredits(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  await interaction.reply({
+    embeds: [buildResetCreditsConfirmEmbed()],
+    components: [buildResetCreditsButtons()],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function handleConfirmResetCredits(interaction) {
+  if (!canResetCredits(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  const result = await resetAllCredits(interaction.guild.id);
+
+  await interaction.update({
+    embeds: [buildResetCreditsSuccessEmbed(result.deletedRows)],
+    components: [],
+  });
+}
+
+async function handleCancelResetCredits(interaction) {
+  if (!canResetCredits(interaction.member)) {
+    await replyNoPermission(interaction);
+    return;
+  }
+
+  await interaction.update({
+    embeds: [buildResetCreditsCancelEmbed()],
+    components: [],
+  });
+}
+
 async function handleInteraction(interaction) {
   if (interaction.isButton()) {
     if (interaction.customId === "add_points") {
@@ -791,6 +841,21 @@ async function handleInteraction(interaction) {
 
     if (interaction.customId === "cancel_reset_points") {
       await handleCancelResetPoints(interaction);
+      return;
+    }
+
+    if (interaction.customId === "reset_credits") {
+      await handleResetCreditsButton(interaction);
+      return;
+    }
+
+    if (interaction.customId === "confirm_reset_credits") {
+      await handleConfirmResetCredits(interaction);
+      return;
+    }
+
+    if (interaction.customId === "cancel_reset_credits") {
+      await handleCancelResetCredits(interaction);
       return;
     }
 
