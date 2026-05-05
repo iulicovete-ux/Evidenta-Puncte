@@ -11,6 +11,10 @@ const RESET_POINTS_ROLE_IDS = [
   ROLE_ADMIN_ID,
 ].filter(Boolean);
 
+const RESET_CREDITS_ROLE_IDS = [
+  ROLE_ADMIN_ID,
+].filter(Boolean);
+
 function memberHasAnyRole(member, roleIds) {
   if (!member || !member.roles || !member.roles.cache) {
     return false;
@@ -27,6 +31,10 @@ function canResetPoints(member) {
   return memberHasAnyRole(member, RESET_POINTS_ROLE_IDS);
 }
 
+function canResetCredits(member) {
+  return memberHasAnyRole(member, RESET_CREDITS_ROLE_IDS);
+}
+
 function isMembruMic(member) {
   return ROLE_MEMBRU_MIC_ID ? memberHasAnyRole(member, [ROLE_MEMBRU_MIC_ID]) : false;
 }
@@ -34,5 +42,6 @@ function isMembruMic(member) {
 module.exports = {
   canManagePoints,
   canResetPoints,
+  canResetCredits,
   isMembruMic,
 };
