@@ -1,0 +1,73 @@
+const { pool } = require("../db/pool");
+
+async function getMemberPointsSummary(discordUserId) {
+  const totalResult = await pool.query(
+    `
+      SELECT COALESCE(SUM(points_awarded), 0) AS total_points
+      FROM point_entries
+      WHERE discord_user_id = $1
+        AND is_voided = FALSE
+    `,
+    [discordUserId]
+  );
+
+  return {
+    totalPoints: Number(totalResult.rows[0]?.total_points || 0),
+  };
+}
+
+async function getMemberPointsPage(discordUserId, page = 1, pageSize = 10) {
+  const offset = (page - 1) * pageSize;
+
+  const totalCountResult = await pool.query(
+    `
+      SELECT COUNT(*) AS total
+      FROM point_entries
+      WHERE discord_user_id = $1
+        AND is_voided = FALSE
+    `,
+    [discordUserId]
+  );
+
+  const total = Number(totalCountResult.rows[0]?.total || 0);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  const entriesResult = await pool.query(
+    `
+      SELECT
+        activity_label,
+        calculation_type,
+        hours,
+        quantity,
+        points_awarded,
+        note,
+        created_at,
+        added_by_discord_user_id
+      FROM point_entries
+      WHERE discord_user_id = $1
+        AND is_voided = FALSE
+      ORDER BY created_at DESC
+      LIMIT $2 OFFSET $3
+    `,
+    [discordUserId, pageSize, offset]
+  );
+
+  return {
+    entries: entriesResult.rows.map((row) => ({
+      activityLabel: row.activity_label,
+      hours: row.hours,
+      quantity: row.quantity,
+      pointsAwarded: Number(row.points_awarded),
+      note: row.note,
+      createdAt: row.created_at,
+      addedByDiscordUserId: row.added_by_discord_user_id,
+    })),
+    currentPage: page,
+    totalPages,
+  };
+}
+
+module.exports = {
+  getMemberPointsSummary,
+  getMemberPointsPage,
+};
